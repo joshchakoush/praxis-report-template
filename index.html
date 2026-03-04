@@ -165,6 +165,14 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .upsell-price{display:flex;align-items:baseline;gap:4px;border-top:1px solid rgba(75,180,165,0.2);padding-top:10px;}
 .upsell-price-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal-light);}
 .upsell-price-label{font-size:11px;color:rgba(255,255,255,0.5);}
+
+/* CTA BUTTONS */
+.cta-row{display:flex;gap:12px;margin-top:16px;position:relative;align-items:center;flex-wrap:wrap;}
+.cta-btn-primary{display:inline-block;background:var(--teal);color:#ffffff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:11px 22px;text-decoration:none;letter-spacing:0.03em;border-top:2px solid var(--teal-light);}
+.cta-btn-primary:hover{background:var(--teal-light);}
+.cta-btn-secondary{display:inline-block;background:transparent;color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;font-size:10px;padding:11px 0;text-decoration:none;letter-spacing:0.08em;border-bottom:1px solid rgba(255,255,255,0.3);}
+.cta-btn-secondary:hover{color:#ffffff;border-bottom-color:#ffffff;}
+.cta-sprint-price{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.45);margin-top:4px;letter-spacing:0.06em;}
 </style>
 </head>
 <body>
@@ -680,6 +688,13 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
       <div class="upsell-cards">
         <div class="upsell-card"><div class="upsell-card-score">SCORE: {{4.upsell_1_score}} — IMMEDIATE ATTENTION REQUIRED</div><div class="upsell-card-title">{{4.upsell_1_title}}</div><div class="upsell-card-desc">{{4.upsell_1_desc}}</div><div class="upsell-price"><div class="upsell-price-num">$97</div><div class="upsell-price-label">&nbsp;one-time</div></div></div>
         <div class="upsell-card"><div class="upsell-card-score">SCORE: {{4.upsell_2_score}} — IMMEDIATE ATTENTION REQUIRED</div><div class="upsell-card-title">{{4.upsell_2_title}}</div><div class="upsell-card-desc">{{4.upsell_2_desc}}</div><div class="upsell-price"><div class="upsell-price-num">$97</div><div class="upsell-price-label">&nbsp;one-time</div></div></div>
+      </div>
+      <div class="cta-row">
+        <div>
+          <a href="https://calendly.com/joshchakoush/30min" class="cta-btn-primary">Book a Free Discovery Call</a>
+          <div class="cta-sprint-price">IMPLEMENTATION SPRINT &mdash; FROM $1,997 AUD &mdash; FIXED SCOPE &bull; FIXED TIMELINE</div>
+        </div>
+        <a href="https://praxisai.com.au/tools" class="cta-btn-secondary">Browse All Tools &rarr;</a>
       </div>
     </div>
   </div>
