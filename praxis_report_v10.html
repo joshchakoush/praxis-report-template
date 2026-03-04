@@ -16,7 +16,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);font-size:13px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 
-/* ── CORE PAGE RULE: every .page is exactly one A4 page, no exceptions ── */
+/* ── CORE PAGE RULE: every .page is exactly one A4 page ── */
 .page{
   width:794px;
   height:1123px;
@@ -40,7 +40,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .cover-confidential{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);text-align:right;line-height:1.9;padding-top:6px;border-top:1px solid rgba(75,180,165,0.4);}
 .cover-body{flex:1;padding:24px 52px 0;position:relative;z-index:2;display:flex;flex-direction:column;}
 .cover-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;}
-.cover-headline{font-family:'DM Serif Display',serif;font-size:38px;line-height:1.1;color:#ffffff;margin-bottom:10px;max-width:520px;}
+.cover-headline{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.1;color:#ffffff;margin-bottom:10px;max-width:560px;}
 .cover-sub{font-size:13px;color:rgba(255,255,255,0.65);max-width:460px;margin-bottom:24px;line-height:1.65;font-style:italic;}
 .cover-divider{width:44px;height:2px;background:var(--teal);margin-bottom:22px;}
 .cover-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(75,180,165,0.25);max-width:580px;margin-bottom:28px;}
@@ -50,7 +50,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .cover-meta-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:4px;}
 .cover-meta-value{font-size:13px;font-weight:500;color:#ffffff;}
 .cover-chart-section{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:0;min-height:0;}
-.cover-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cover-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .cover-chart-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);font-weight:500;}
 .cover-chart-overall{font-family:'DM Serif Display',serif;font-size:26px;color:#ffffff;}
 .cover-chart-overall span{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,0.55);margin-left:4px;}
@@ -59,7 +59,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .cover-footer{padding:20px 52px;border-top:1px solid rgba(75,180,165,0.15);display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2;}
 .cover-footer-text{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;}
 
-/* INNER PAGES — fixed height layout using flex column */
+/* INNER PAGES */
 .inner-page{
   height:1123px;
   display:flex;
@@ -71,24 +71,20 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 }
 .inner-page::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
 
-/* page header — fixed height */
 .page-header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 14px;border-bottom:1px solid var(--rule);flex-shrink:0;}
 .page-header-logo img{height:90px;width:auto;}
 .page-header-right{font-family:'DM Mono',monospace;font-size:9px;color:var(--charcoal-light);letter-spacing:0.1em;text-align:right;line-height:1.8;text-transform:uppercase;}
 
-/* page content area — grows to fill available space */
 .page-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 
-/* page footer — fixed height, always at bottom */
-.report-footer{padding:12px 0;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--page);flex-shrink:0;margin:0 -52px;padding:12px 52px;}
-
+.report-footer{border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--page);flex-shrink:0;margin:0 -52px;padding:12px 52px;}
 .footer-disclaimer{font-size:9px;color:var(--charcoal-light);max-width:500px;line-height:1.5;font-family:'DM Mono',monospace;}
 .footer-page{font-family:'DM Mono',monospace;font-size:10px;color:var(--charcoal-light);flex-shrink:0;}
 
 .section-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;flex-shrink:0;}
 .section-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--charcoal);margin-bottom:14px;line-height:1.2;flex-shrink:0;}
 
-/* EXEC SUMMARY — tightly controlled */
+/* EXEC SUMMARY */
 .exec-summary{background:var(--charcoal);padding:20px 26px;margin-bottom:18px;position:relative;flex-shrink:0;}
 .exec-summary::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);}
 .exec-summary p{font-size:12.5px;line-height:1.75;color:#e8e8e8;}
@@ -99,12 +95,12 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .scorecard-row:last-child{border-bottom:none;}
 .scorecard-dim{width:185px;font-size:11.5px;font-weight:500;color:var(--charcoal);flex-shrink:0;}
 .scorecard-bar-track{flex:1;height:5px;background:var(--teal-dim);border-radius:3px;overflow:visible;position:relative;}
-.scorecard-bar-track::after{content:'';position:absolute;left:60%;top:-3px;width:2px;height:11px;background:rgba(212,130,10,0.7);border-radius:1px;}
+.scorecard-bar-track::after{content:'';position:absolute;left:60%;top:-3px;width:2px;height:11px;background:rgba(212,130,10,0.75);border-radius:1px;}
 .scorecard-bar-fill{height:100%;border-radius:3px;}
 .scorecard-score{width:26px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;text-align:right;color:var(--charcoal);flex-shrink:0;}
 .scorecard-tag{width:230px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.04em;flex-shrink:0;padding:3px 7px;border-radius:2px;}
 
-/* DISCLAIMER — fixed text, compact */
+/* DISCLAIMER */
 .disclaimer-block{background:#1a1a1a;border:2px solid var(--amber);padding:18px 22px;flex-shrink:0;}
 .disclaimer-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .disclaimer-icon{width:24px;height:24px;background:var(--amber);color:#1a1a1a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -113,24 +109,32 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
 .disclaimer-text strong{color:#ffffff;font-weight:600;}
 .disclaimer-text em{color:rgba(255,255,255,0.8);font-style:italic;}
 
-/* DIMENSION SECTIONS */
-.dim-section{margin-bottom:22px;flex-shrink:0;}
-.dim-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--charcoal);}
-.dim-number{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:2px;}
-.dim-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--charcoal);}
-.dim-score-badge{display:flex;align-items:baseline;gap:4px;}
-.dim-score-num{font-family:'DM Serif Display',serif;font-size:32px;color:var(--teal);line-height:1;}
-.dim-score-denom{font-family:'DM Mono',monospace;font-size:10px;color:var(--charcoal-light);}
-.dim-finding p{font-size:12.5px;line-height:1.72;color:var(--charcoal-mid);margin-bottom:10px;}
-.dim-finding p:last-child{margin-bottom:0;}
-.callout{margin:10px 0;padding:12px 16px;border-left:3px solid var(--teal);background:var(--teal-dim);}
-.callout-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:4px;}
-.callout-body{font-size:12px;line-height:1.62;color:var(--charcoal);}
-.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0;}
-.metric-card{padding:12px 11px;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--teal);}
-.metric-num{font-family:'DM Serif Display',serif;font-size:19px;color:var(--teal-deep);line-height:1;margin-bottom:3px;}
-.metric-label{font-size:10.5px;font-weight:600;color:var(--charcoal);margin-bottom:3px;}
-.metric-note{font-size:9.5px;color:var(--charcoal-light);line-height:1.4;}
+/* DIMENSION PAGES — full page per dimension */
+.dim-page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;padding-bottom:14px;border-bottom:2px solid var(--charcoal);flex-shrink:0;}
+.dim-page-left{}
+.dim-number{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:500;}
+.dim-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--charcoal);line-height:1.1;}
+.dim-score-badge{display:flex;align-items:baseline;gap:6px;flex-shrink:0;}
+.dim-score-num{font-family:'DM Serif Display',serif;font-size:48px;color:var(--teal);line-height:1;font-weight:700;}
+.dim-score-denom{font-family:'DM Mono',monospace;font-size:13px;color:var(--charcoal-light);font-weight:500;}
+.dim-score-status{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:3px;align-self:center;}
+
+.dim-findings{margin-bottom:16px;flex-shrink:0;}
+.dim-findings p{font-size:13px;line-height:1.75;color:var(--charcoal-mid);margin-bottom:12px;}
+.dim-findings p:last-child{margin-bottom:0;}
+
+.callout{margin:0 0 10px 0;padding:13px 16px;border-left:3px solid var(--teal);background:var(--teal-dim);flex-shrink:0;}
+.callout:last-of-type{margin-bottom:0;}
+.callout-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:5px;}
+.callout-body{font-size:12.5px;line-height:1.65;color:var(--charcoal);}
+
+.callouts-block{margin-bottom:14px;flex-shrink:0;}
+
+.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex-shrink:0;}
+.metric-card{padding:14px 13px;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--teal);}
+.metric-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--teal-deep);line-height:1;margin-bottom:4px;}
+.metric-label{font-size:11px;font-weight:600;color:var(--charcoal);margin-bottom:3px;}
+.metric-note{font-size:10px;color:var(--charcoal-light);line-height:1.4;}
 
 /* ACTIONS */
 .actions-section{flex-shrink:0;}
@@ -172,7 +176,6 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
   <div class="cover-body">
     <div class="cover-eyebrow">Praxis AI Operational Intelligence Report</div>
     <div class="cover-headline">{{4.business_name}}</div>
-    <div class="cover-sub">Praxis AI Operational Intelligence Report</div>
     <div class="cover-divider"></div>
     <div class="cover-meta-grid">
       <div class="cover-meta-item"><div class="cover-meta-label">Business</div><div class="cover-meta-value">{{4.business_name}}</div></div>
@@ -207,12 +210,12 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
     <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
   </div>
   <div class="page-content">
-    <div class="section-eyebrow">Overview</div>
+    <div class="section-eyebrow" style="margin-top:14px;">Overview</div>
     <div class="section-title">Executive Summary</div>
     <div class="exec-summary">
       <p>{{4.executive_summary}}</p>
     </div>
-    <div class="section-eyebrow" style="margin-top:16px;">Results</div>
+    <div class="section-eyebrow" style="margin-top:14px;">Results</div>
     <div class="section-title">Six-Dimension Scorecard</div>
     <div class="scorecard">
       <div class="scorecard-row">
@@ -258,7 +261,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="disclaimer-heading">Legal Disclaimer &amp; Limitations of This Report</div>
       </div>
       <div class="disclaimer-text">
-        <strong>This report does not constitute financial, legal, accounting, tax, or any form of professional advice.</strong> It is an automated diagnostic output generated solely from self-reported responses and has not been independently verified. No warranty — express or implied — is given as to accuracy, completeness, or fitness for any purpose.<br><br>
+        <strong>This report does not constitute financial, legal, accounting, tax, or any form of professional advice.</strong> It is an automated diagnostic output generated solely from self-reported responses and has not been independently verified. No warranty, express or implied, is given as to accuracy, completeness, or fitness for any purpose.<br><br>
         All financial figures, estimates, and ranges are derived exclusively from data declared by the respondent. <strong>No figure in this report should be relied upon for financial planning, investment decisions, or any commercial transaction without independent verification by a qualified professional.</strong><br><br>
         Praxis AI expressly excludes all liability to the fullest extent permitted under the <em>Australian Consumer Law</em> for any loss arising from use of or reliance upon this report. Receipt constitutes acknowledgement of these terms. <strong>Engage a licensed accountant, solicitor, or registered business advisor for formal advice.</strong>
       </div>
@@ -266,12 +269,12 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
   </div>
   <div class="report-footer">
     <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
-    <div class="footer-page">Page 2 of 6</div>
+    <div class="footer-page">Page 2 of 9</div>
   </div>
 </div>
 </div>
 
-<!-- ══ PAGE 3: DIM 1 + DIM 2 ══ -->
+<!-- ══ PAGE 3: DIMENSION 01 ══ -->
 <div class="page">
 <div class="inner-page">
   <div class="page-header">
@@ -279,34 +282,72 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
     <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
   </div>
   <div class="page-content">
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 01</div><div class="dim-title">Process &amp; Workflow</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim1_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim1_status}}</div></div>
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 01</div>
+        <div class="dim-title">Process &amp; Workflow</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim1_finding_1}}</p>
-        <p>{{4.dim1_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim1_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim1_tag_bg}};color:{{4.dim1_tag_colour}}">{{4.dim1_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim1_finding_1}}</p>
+      <p>{{4.dim1_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim1_callout_1_border}};background:{{4.dim1_callout_1_bg}}">
         <div class="callout-label">{{4.dim1_callout_1_label}}</div>
         <div class="callout-body">{{4.dim1_callout_1_body}}</div>
       </div>
-      <div class="metric-row">
-        <div class="metric-card"><div class="metric-num">{{4.dim1_metric_1_num}}</div><div class="metric-label">{{4.dim1_metric_1_label}}</div><div class="metric-note">{{4.dim1_metric_1_note}}</div></div>
-        <div class="metric-card"><div class="metric-num">{{4.dim1_metric_2_num}}</div><div class="metric-label">{{4.dim1_metric_2_label}}</div><div class="metric-note">{{4.dim1_metric_2_note}}</div></div>
-        <div class="metric-card"><div class="metric-num">{{4.dim1_metric_3_num}}</div><div class="metric-label">{{4.dim1_metric_3_label}}</div><div class="metric-note">{{4.dim1_metric_3_note}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim1_callout_2_border}};background:{{4.dim1_callout_2_bg}}">
+        <div class="callout-label">{{4.dim1_callout_2_label}}</div>
+        <div class="callout-body">{{4.dim1_callout_2_body}}</div>
       </div>
     </div>
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 02</div><div class="dim-title">People &amp; Training</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim2_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim2_status}}</div></div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_1_num}}</div><div class="metric-label">{{4.dim1_metric_1_label}}</div><div class="metric-note">{{4.dim1_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_2_num}}</div><div class="metric-label">{{4.dim1_metric_2_label}}</div><div class="metric-note">{{4.dim1_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_3_num}}</div><div class="metric-label">{{4.dim1_metric_3_label}}</div><div class="metric-note">{{4.dim1_metric_3_note}}</div></div>
+    </div>
+  </div>
+  <div class="report-footer">
+    <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
+    <div class="footer-page">Page 3 of 9</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 4: DIMENSION 02 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header">
+    <div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div>
+    <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
+  </div>
+  <div class="page-content">
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 02</div>
+        <div class="dim-title">People &amp; Training</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim2_finding_1}}</p>
-        <p>{{4.dim2_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim2_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim2_tag_bg}};color:{{4.dim2_tag_colour}}">{{4.dim2_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim2_finding_1}}</p>
+      <p>{{4.dim2_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim2_callout_1_border}};background:{{4.dim2_callout_1_bg}}">
         <div class="callout-label">{{4.dim2_callout_1_label}}</div>
         <div class="callout-body">{{4.dim2_callout_1_body}}</div>
@@ -316,15 +357,20 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="callout-body">{{4.dim2_callout_2_body}}</div>
       </div>
     </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_1_num}}</div><div class="metric-label">{{4.dim2_metric_1_label}}</div><div class="metric-note">{{4.dim2_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_2_num}}</div><div class="metric-label">{{4.dim2_metric_2_label}}</div><div class="metric-note">{{4.dim2_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_3_num}}</div><div class="metric-label">{{4.dim2_metric_3_label}}</div><div class="metric-note">{{4.dim2_metric_3_note}}</div></div>
+    </div>
   </div>
   <div class="report-footer">
     <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
-    <div class="footer-page">Page 3 of 6</div>
+    <div class="footer-page">Page 4 of 9</div>
   </div>
 </div>
 </div>
 
-<!-- ══ PAGE 4: DIM 3 + DIM 4 ══ -->
+<!-- ══ PAGE 5: DIMENSION 03 ══ -->
 <div class="page">
 <div class="inner-page">
   <div class="page-header">
@@ -332,15 +378,24 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
     <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
   </div>
   <div class="page-content">
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 03</div><div class="dim-title">Technology &amp; Automation</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim3_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim3_status}}</div></div>
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 03</div>
+        <div class="dim-title">Technology &amp; Automation</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim3_finding_1}}</p>
-        <p>{{4.dim3_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim3_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim3_tag_bg}};color:{{4.dim3_tag_colour}}">{{4.dim3_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim3_finding_1}}</p>
+      <p>{{4.dim3_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim3_callout_1_border}};background:{{4.dim3_callout_1_bg}}">
         <div class="callout-label">{{4.dim3_callout_1_label}}</div>
         <div class="callout-body">{{4.dim3_callout_1_body}}</div>
@@ -350,15 +405,45 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="callout-body">{{4.dim3_callout_2_body}}</div>
       </div>
     </div>
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 04</div><div class="dim-title">Strategy to Execution</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim4_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim4_status}}</div></div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_1_num}}</div><div class="metric-label">{{4.dim3_metric_1_label}}</div><div class="metric-note">{{4.dim3_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_2_num}}</div><div class="metric-label">{{4.dim3_metric_2_label}}</div><div class="metric-note">{{4.dim3_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_3_num}}</div><div class="metric-label">{{4.dim3_metric_3_label}}</div><div class="metric-note">{{4.dim3_metric_3_note}}</div></div>
+    </div>
+  </div>
+  <div class="report-footer">
+    <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
+    <div class="footer-page">Page 5 of 9</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 6: DIMENSION 04 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header">
+    <div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div>
+    <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
+  </div>
+  <div class="page-content">
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 04</div>
+        <div class="dim-title">Strategy to Execution</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim4_finding_1}}</p>
-        <p>{{4.dim4_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim4_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim4_tag_bg}};color:{{4.dim4_tag_colour}}">{{4.dim4_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim4_finding_1}}</p>
+      <p>{{4.dim4_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim4_callout_1_border}};background:{{4.dim4_callout_1_bg}}">
         <div class="callout-label">{{4.dim4_callout_1_label}}</div>
         <div class="callout-body">{{4.dim4_callout_1_body}}</div>
@@ -368,15 +453,20 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="callout-body">{{4.dim4_callout_2_body}}</div>
       </div>
     </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_1_num}}</div><div class="metric-label">{{4.dim4_metric_1_label}}</div><div class="metric-note">{{4.dim4_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_2_num}}</div><div class="metric-label">{{4.dim4_metric_2_label}}</div><div class="metric-note">{{4.dim4_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_3_num}}</div><div class="metric-label">{{4.dim4_metric_3_label}}</div><div class="metric-note">{{4.dim4_metric_3_note}}</div></div>
+    </div>
   </div>
   <div class="report-footer">
     <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
-    <div class="footer-page">Page 4 of 6</div>
+    <div class="footer-page">Page 6 of 9</div>
   </div>
 </div>
 </div>
 
-<!-- ══ PAGE 5: DIM 5 + DIM 6 ══ -->
+<!-- ══ PAGE 7: DIMENSION 05 ══ -->
 <div class="page">
 <div class="inner-page">
   <div class="page-header">
@@ -384,34 +474,72 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
     <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
   </div>
   <div class="page-content">
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 05</div><div class="dim-title">Data &amp; Decision Making</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim5_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim5_status}}</div></div>
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 05</div>
+        <div class="dim-title">Data &amp; Decision Making</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim5_finding_1}}</p>
-        <p>{{4.dim5_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim5_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim5_tag_bg}};color:{{4.dim5_tag_colour}}">{{4.dim5_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim5_finding_1}}</p>
+      <p>{{4.dim5_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim5_callout_1_border}};background:{{4.dim5_callout_1_bg}}">
         <div class="callout-label">{{4.dim5_callout_1_label}}</div>
         <div class="callout-body">{{4.dim5_callout_1_body}}</div>
       </div>
-      <div class="metric-row">
-        <div class="metric-card"><div class="metric-num">{{4.dim5_metric_1_num}}</div><div class="metric-label">{{4.dim5_metric_1_label}}</div><div class="metric-note">{{4.dim5_metric_1_note}}</div></div>
-        <div class="metric-card"><div class="metric-num">{{4.dim5_metric_2_num}}</div><div class="metric-label">{{4.dim5_metric_2_label}}</div><div class="metric-note">{{4.dim5_metric_2_note}}</div></div>
-        <div class="metric-card"><div class="metric-num">{{4.dim5_metric_3_num}}</div><div class="metric-label">{{4.dim5_metric_3_label}}</div><div class="metric-note">{{4.dim5_metric_3_note}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim5_callout_2_border}};background:{{4.dim5_callout_2_bg}}">
+        <div class="callout-label">{{4.dim5_callout_2_label}}</div>
+        <div class="callout-body">{{4.dim5_callout_2_body}}</div>
       </div>
     </div>
-    <div class="dim-section">
-      <div class="dim-header">
-        <div><div class="dim-number">Dimension 06</div><div class="dim-title">Scalability</div></div>
-        <div class="dim-score-badge"><div class="dim-score-num">{{4.dim6_score}}</div><div class="dim-score-denom">&nbsp;/ 10 &middot; {{4.dim6_status}}</div></div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_1_num}}</div><div class="metric-label">{{4.dim5_metric_1_label}}</div><div class="metric-note">{{4.dim5_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_2_num}}</div><div class="metric-label">{{4.dim5_metric_2_label}}</div><div class="metric-note">{{4.dim5_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_3_num}}</div><div class="metric-label">{{4.dim5_metric_3_label}}</div><div class="metric-note">{{4.dim5_metric_3_note}}</div></div>
+    </div>
+  </div>
+  <div class="report-footer">
+    <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
+    <div class="footer-page">Page 7 of 9</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 8: DIMENSION 06 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header">
+    <div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div>
+    <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
+  </div>
+  <div class="page-content">
+    <div style="margin-top:14px;" class="dim-page-header">
+      <div class="dim-page-left">
+        <div class="dim-number">Dimension 06</div>
+        <div class="dim-title">Scalability</div>
       </div>
-      <div class="dim-finding">
-        <p>{{4.dim6_finding_1}}</p>
-        <p>{{4.dim6_finding_2}}</p>
+      <div class="dim-score-badge">
+        <div class="dim-score-num">{{4.dim6_score}}</div>
+        <div>
+          <div class="dim-score-denom">/ 10</div>
+          <div class="dim-score-status" style="background:{{4.dim6_tag_bg}};color:{{4.dim6_tag_colour}}">{{4.dim6_status}}</div>
+        </div>
       </div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim6_finding_1}}</p>
+      <p>{{4.dim6_finding_2}}</p>
+    </div>
+    <div class="callouts-block">
       <div class="callout" style="border-left-color:{{4.dim6_callout_1_border}};background:{{4.dim6_callout_1_bg}}">
         <div class="callout-label">{{4.dim6_callout_1_label}}</div>
         <div class="callout-body">{{4.dim6_callout_1_body}}</div>
@@ -421,15 +549,20 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="callout-body">{{4.dim6_callout_2_body}}</div>
       </div>
     </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_1_num}}</div><div class="metric-label">{{4.dim6_metric_1_label}}</div><div class="metric-note">{{4.dim6_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_2_num}}</div><div class="metric-label">{{4.dim6_metric_2_label}}</div><div class="metric-note">{{4.dim6_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_3_num}}</div><div class="metric-label">{{4.dim6_metric_3_label}}</div><div class="metric-note">{{4.dim6_metric_3_note}}</div></div>
+    </div>
   </div>
   <div class="report-footer">
     <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
-    <div class="footer-page">Page 5 of 6</div>
+    <div class="footer-page">Page 8 of 9</div>
   </div>
 </div>
 </div>
 
-<!-- ══ PAGE 6: ACTIONS + UPSELL ══ -->
+<!-- ══ PAGE 9: ACTIONS + UPSELL ══ -->
 <div class="page">
 <div class="inner-page">
   <div class="page-header">
@@ -437,7 +570,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
     <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
   </div>
   <div class="page-content">
-    <div class="section-eyebrow">What To Do Next</div>
+    <div class="section-eyebrow" style="margin-top:14px;">What To Do Next</div>
     <div class="section-title">Priority Actions</div>
     <div class="actions-section">
       <div class="action-item"><div class="action-num">1</div><div><div class="action-title">{{4.action_1_title}}</div><div class="action-body">{{4.action_1_body}}</div></div></div>
@@ -469,7 +602,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
   </div>
   <div class="report-footer">
     <div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div>
-    <div class="footer-page">Page 6 of 6</div>
+    <div class="footer-page">Page 9 of 9</div>
   </div>
 </div>
 </div>

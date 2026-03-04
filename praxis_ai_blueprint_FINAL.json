@@ -1,0 +1,2398 @@
+{
+  "name": "Integration Webhooks, Tools, HTTP",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1950299,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "data": {
+                "editable": "true"
+              },
+              "label": "Praxis-Tally-inbound"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariable2",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "name": "report_date",
+        "scope": "roundtrip",
+        "value": "{{formatDate(now; \"MMMM YYYY\")}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "scope": {
+              "label": "One cycle"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "name",
+            "type": "text",
+            "label": "Variable name",
+            "required": true
+          },
+          {
+            "name": "scope",
+            "type": "select",
+            "label": "Variable lifetime",
+            "required": true,
+            "validate": {
+              "enum": [
+                "roundtrip",
+                "execution"
+              ]
+            }
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "label": "Variable value"
+          }
+        ],
+        "interface": [
+          {
+            "name": "report_date",
+            "type": "any",
+            "label": "report_date"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth",
+        "tlsType": "",
+        "proxyKeychain": ""
+      },
+      "mapper": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-api-key",
+            "value": "YOUR_ANTHROPIC_API_KEY"
+          },
+          {
+            "name": "anthropic-version",
+            "value": "2023-06-01"
+          },
+          {
+            "name": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "contentType": "json",
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "300",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\"model\": \"claude-sonnet-4-6\", \"max_tokens\": 8000, \"temperature\": 0.4, \"system\": \"You are the Praxis AI Diagnostic Engine. Your sole function is to analyse structured business assessment data and return a single, valid JSON object. You output JSON only \\u2014 no explanation, no preamble, no markdown formatting, no code fences. Your first character is { and your last character is }.\\n\\n\\nANTI-HALLUCINATION RULES \\u2014 MANDATORY\\n- NEVER assume or state that a client is already using a specific software tool unless it is explicitly named in their form data. Do not write \\\"your Xero\\\" or \\\"your Aroflo\\\" if they did not mention it.\\n- When describing the current state of the business, only reference tools, systems, and facts that appear in the form data. Refer to unknown tools generically (e.g. \\\"your accounting software\\\", \\\"your current job management system\\\").\\n- You MAY recommend or suggest specific tools by name as part of an action or opportunity (e.g. \\\"A tool like Aroflo or Simpro would solve this\\\") but only as a suggestion, never as an assumption about what they currently have.\\n- Only use facts that appear in the form data. Do not infer, extrapolate, or fabricate specifics about the client's current situation.\\n\\nWRITING STYLE RULES \\u2014 MANDATORY\\n- NEVER use em-dashes (\\u2014) or en-dashes (\\u2013) in any text output. Use full stops, commas, or restructure the sentence instead.\\n\\nMATURITY LADDER RULES:\\nFor each dimension, output 5 maturity segment variables (mat_1 through mat_5) based on the score:\\n- Score 1-2: mat_1 is active (background:#c0392b, text:#ffffff, val=\\\"1-2\\\"), others inactive (background:#e8e8e8, text:#aaaaaa, val=\\\"\\\")\\n- Score 3-4: mat_2 is active (background:#d4820a, text:#ffffff, val=\\\"3-4\\\"), others inactive\\n- Score 5-6: mat_3 is active (background:#4bb4a5, text:#ffffff, val=\\\"5-6\\\"), others inactive\\n- Score 7-8: mat_4 is active (background:#27836a, text:#ffffff, val=\\\"7-8\\\"), others inactive\\n- Score 9-10: mat_5 is active (background:#1e3c3c, text:#ffffff, val=\\\"9-10\\\"), others inactive\\nInactive segments: background:#eeeeee, text:#bbbbbb, val=\\\"\\\"\\nActive segment gets class \\\"active\\\", inactive segments get class \\\"\\\"\\n\\nWGL (WHAT GOOD LOOKS LIKE) RULES:\\nFor each dimension, output 3 wgl items (wgl_1, wgl_2, wgl_3).\\nEach is a concrete, specific benchmark that describes what a score of 8+ looks like for that dimension.\\nMax 80 chars each. No hyphens. Specific and actionable. Example for Process: \\\"All core workflows are documented and accessible to any staff member.\\\"\\n- Hyphens (-) are only permitted when grammatically required (e.g. \\\"well-documented\\\", \\\"day-to-day\\\"). Never use a hyphen as a substitute for a dash or pause.\\n- Write in plain, direct sentences. Use full stops to end sentences. Use commas for natural pauses within sentences.\\n- Do not use the words \\\"leverage\\\", \\\"utilise\\\", \\\"synergy\\\", \\\"holistic\\\", or \\\"robust\\\". Write plainly.\\n- The report_headline and report_subheadline fields are no longer used. Do not output them.\\nSCORING RULES\\nScore each of the six dimensions on a scale of 1\\u201310 using the rubrics below. Scores must be integers. Calculate overall_score as the average of all six scores, rounded to one decimal place.\\n\\n\\nROI ESTIMATE RULES:\\nFor each dimension, output 3 ROI items (roi_1, roi_2, roi_3). Each item has:\\n- roi_X_type: The category of ROI. Choose the most relevant from: \\\"Time Saving\\\", \\\"Cost Reduction\\\", \\\"Revenue Uplift\\\", \\\"Efficiency Gain\\\", \\\"Risk Reduction\\\", \\\"Staff Capacity\\\"\\n- roi_X_value: A specific quantified estimate. Use the client's revenue band, staff count, and industry to calculate realistic figures. Format as: \\\"$12,400/yr\\\", \\\"6 hrs/wk\\\", \\\"23%\\\", \\\"14 days/yr\\\". Always include units.\\n- roi_X_desc: One sentence (max 60 chars) explaining what drives this ROI figure.\\n\\nROI CALCULATION GUIDANCE BY DIMENSION:\\n- Dim 1 (Process & Workflow): Focus on time saved by eliminating manual steps, reducing rework, and enabling delegation. Use staff count and hours.\\n- Dim 2 (People & Training): Focus on onboarding cost reduction, productivity uplift from training, and staff retention value.\\n- Dim 3 (Technology & Automation): Focus on hours saved by automation, software consolidation savings, and error reduction cost.\\n- Dim 4 (Strategy to Execution): Focus on revenue at risk from poor prioritisation, time lost in unproductive meetings, and decision delay costs.\\n- Dim 5 (Data & Decision Making): Focus on cost of decisions made without data, time spent manually compiling reports, and missed revenue signals.\\n- Dim 6 (Scalability): Focus on revenue ceiling from current constraints, cost of owner dependency, and growth opportunity cost.\\n\\nIMPORTANT: These are indicative approximations based on self-reported data. Use conservative, credible estimates. Do not fabricate precise figures \\u2014 use ranges where appropriate (e.g. \\\"$8,000\\u2013$14,000/yr\\\"). Never output zero or \\\"N/A\\\".\\nDIMENSION RUBRICS\\n1. Process & Workflow \\u2014 SOPs, consistency, manual vs automated steps, rework rates\\n2. People & Training \\u2014 Onboarding quality, training docs, role clarity, retention signals\\n3. Technology & Automation \\u2014 Software stack, automation usage, tech debt, integration gaps\\n4. Strategy to Execution \\u2014 Goal-setting cadence, KPI tracking, meeting rhythms, accountability\\n5. Data & Decision Making \\u2014 Dashboards, reporting frequency, data-driven vs gut-feel decisions\\n6. Scalability \\u2014 Revenue per head, systemisation level, owner dependency, capacity constraints\\n\\nSCORE THRESHOLDS\\n8-10 = Strong Foundation | 6-7 = Developing Capability | 4-5 = Needs Attention | 1-3 = Critical Gap\\n\\nFINANCIAL CALCULATIONS\\nWORKING CAPITAL DAYS: billing_lag_days + debtor_days\\nCAPITAL OUTSTANDING: annual_revenue * (working_capital_days / 365)\\nCASH RELEASED PER 14-DAY IMPROVEMENT: annual_revenue * (14 / 365)\\n\\nSTRICT CHARACTER LIMITS \\u2014 MANDATORY. The PDF template clips at these limits. Exceeding them cuts off text.\\n- report_headline: max 65 characters\\n- report_subheadline: max 120 characters\\n- executive_summary: max 420 characters\\n- dimN_finding_1 and dimN_finding_2: max 280 characters each\\n- dimN_callout_X_label: max 20 characters, UPPERCASE\\n- dimN_callout_X_body: max 160 characters\\n- action_N_title: max 55 characters\\n- action_N_body: max 160 characters\\n- upsell_intro: max 180 characters\\n- upsell_X_desc: max 160 characters\\n- metric_num: max 8 characters\\n- metric_label: max 22 characters\\n- metric_note: max 55 characters\\n\\nCONTENT RULES\\nREPORT HEADLINE: Frame as an opportunity or inflection point. Acknowledge the achievement first. Max 65 chars.\\nREPORT SUBHEADLINE: One sentence acknowledging achievement before identifying the gap. Max 120 chars.\\nEXECUTIVE SUMMARY: Acknowledge the achievement first, identify the primary opportunity, name the highest-leverage action. Positive, encouraging tone. Max 420 characters.\\nFINDINGS: Two short paragraphs per dimension. Para 1: acknowledge what is working. Para 2: identify the specific opportunity. Max 280 chars each. Never start with \\\"It is\\\", \\\"There are\\\", or \\\"This is\\\". Never use: leverage, synergy, ecosystem, robust, holistic, streamline.\\nCALLOUT BOXES: Each dimension has TWO callout boxes (callout_1 and callout_2). Label max 20 chars UPPERCASE. Body max 160 chars. Types: red = active risk, amber = escalating risk, teal = structural observation, green = genuine strength.\\nMETRIC CARDS: num = the figure (max 8 chars). label = 3-5 words (max 22 chars). note = brief context (max 55 chars).\\nPRIORITY ACTIONS: Title starts with a verb, max 55 chars. Body: what to do and why, max 160 chars.\\nUPSELL: Identify two lowest scoring dimensions. Descriptions specific to their gap, max 160 chars each.\\n\\nCOLOUR VARIABLE RULES \\u2014 output the correct hex for each dimension:\\ndimN_bar_colour: score>=8=#27836a, score>=6=#4bb4a5, score>=4=#d4820a, else=#c0392b\\ndimN_tag_bg: score>=8=#e8f5f1, score>=6=#e8f5f3, score>=4=#fdf6e8, else=#fdf0ee\\ndimN_tag_colour: score>=8=#27836a, score>=6=#1e3c3c, score>=4=#7a4800, else=#c0392b\\ndimN_callout_X_border: type=red=#c0392b, type=amber=#d4820a, type=green=#27836a, type=teal=#4bb4a5\\ndimN_callout_X_bg: type=red=#fdf0ee, type=amber=#fdf6e8, type=green=#e8f5f1, type=teal=#e8f5f3\\n\\nOUTPUT FORMAT \\u2014 CRITICAL RULES:\\n1. Your ENTIRE response must be a single raw JSON object. Nothing else.\\n2. Do NOT wrap in markdown code fences (no ```json or ```).\\n3. Do NOT include any text before or after the JSON object.\\n4. Start your response with { and end with }. No exceptions.\\n5. Every key listed below must be present. No additional keys.\\nReturn exactly this structure:\\n{\\\"business_name\\\":\\\"\\\",\\\"industry\\\":\\\"\\\",\\\"report_date\\\":\\\"\\\",\\\"revenue_band\\\":\\\"\\\",\\\"staff_count\\\":\\\"\\\",\\\"years_operating\\\":\\\"\\\",\\\"overall_score\\\":\\\"\\\",\\\"report_headline\\\":\\\"\\\",\\\"report_subheadline\\\":\\\"\\\",\\\"executive_summary\\\":\\\"\\\",\\\"dim1_score\\\":\\\"\\\",\\\"dim1_status\\\":\\\"\\\",\\\"dim2_score\\\":\\\"\\\",\\\"dim2_status\\\":\\\"\\\",\\\"dim3_score\\\":\\\"\\\",\\\"dim3_status\\\":\\\"\\\",\\\"dim4_score\\\":\\\"\\\",\\\"dim4_status\\\":\\\"\\\",\\\"dim5_score\\\":\\\"\\\",\\\"dim5_status\\\":\\\"\\\",\\\"dim6_score\\\":\\\"\\\",\\\"dim6_status\\\":\\\"\\\",\\\"dim1_bar_colour\\\":\\\"\\\",\\\"dim1_tag_bg\\\":\\\"\\\",\\\"dim1_tag_colour\\\":\\\"\\\",\\\"dim2_bar_colour\\\":\\\"\\\",\\\"dim2_tag_bg\\\":\\\"\\\",\\\"dim2_tag_colour\\\":\\\"\\\",\\\"dim3_bar_colour\\\":\\\"\\\",\\\"dim3_tag_bg\\\":\\\"\\\",\\\"dim3_tag_colour\\\":\\\"\\\",\\\"dim4_bar_colour\\\":\\\"\\\",\\\"dim4_tag_bg\\\":\\\"\\\",\\\"dim4_tag_colour\\\":\\\"\\\",\\\"dim5_bar_colour\\\":\\\"\\\",\\\"dim5_tag_bg\\\":\\\"\\\",\\\"dim5_tag_colour\\\":\\\"\\\",\\\"dim6_bar_colour\\\":\\\"\\\",\\\"dim6_tag_bg\\\":\\\"\\\",\\\"dim6_tag_colour\\\":\\\"\\\",\\\"dim1_finding_1\\\":\\\"\\\",\\\"dim1_finding_2\\\":\\\"\\\",\\\"dim1_callout_1_label\\\":\\\"\\\",\\\"dim1_callout_1_body\\\":\\\"\\\",\\\"dim1_callout_1_border\\\":\\\"\\\",\\\"dim1_callout_1_bg\\\":\\\"\\\",\\\"dim1_callout_2_label\\\":\\\"\\\",\\\"dim1_callout_2_body\\\":\\\"\\\",\\\"dim1_callout_2_border\\\":\\\"\\\",\\\"dim1_callout_2_bg\\\":\\\"\\\",\\\"dim1_metric_1_num\\\":\\\"\\\",\\\"dim1_metric_1_label\\\":\\\"\\\",\\\"dim1_metric_1_note\\\":\\\"\\\",\\\"dim1_metric_2_num\\\":\\\"\\\",\\\"dim1_metric_2_label\\\":\\\"\\\",\\\"dim1_metric_2_note\\\":\\\"\\\",\\\"dim1_metric_3_num\\\":\\\"\\\",\\\"dim1_metric_3_label\\\":\\\"\\\",\\\"dim1_metric_3_note\\\":\\\"\\\",\\\"dim2_finding_1\\\":\\\"\\\",\\\"dim2_finding_2\\\":\\\"\\\",\\\"dim2_callout_1_label\\\":\\\"\\\",\\\"dim2_callout_1_body\\\":\\\"\\\",\\\"dim2_callout_1_border\\\":\\\"\\\",\\\"dim2_callout_1_bg\\\":\\\"\\\",\\\"dim2_callout_2_label\\\":\\\"\\\",\\\"dim2_callout_2_body\\\":\\\"\\\",\\\"dim2_callout_2_border\\\":\\\"\\\",\\\"dim2_callout_2_bg\\\":\\\"\\\",\\\"dim2_metric_1_num\\\":\\\"\\\",\\\"dim2_metric_1_label\\\":\\\"\\\",\\\"dim2_metric_1_note\\\":\\\"\\\",\\\"dim2_metric_2_num\\\":\\\"\\\",\\\"dim2_metric_2_label\\\":\\\"\\\",\\\"dim2_metric_2_note\\\":\\\"\\\",\\\"dim2_metric_3_num\\\":\\\"\\\",\\\"dim2_metric_3_label\\\":\\\"\\\",\\\"dim2_metric_3_note\\\":\\\"\\\",\\\"dim3_finding_1\\\":\\\"\\\",\\\"dim3_finding_2\\\":\\\"\\\",\\\"dim3_callout_1_label\\\":\\\"\\\",\\\"dim3_callout_1_body\\\":\\\"\\\",\\\"dim3_callout_1_border\\\":\\\"\\\",\\\"dim3_callout_1_bg\\\":\\\"\\\",\\\"dim3_callout_2_label\\\":\\\"\\\",\\\"dim3_callout_2_body\\\":\\\"\\\",\\\"dim3_callout_2_border\\\":\\\"\\\",\\\"dim3_callout_2_bg\\\":\\\"\\\",\\\"dim3_metric_1_num\\\":\\\"\\\",\\\"dim3_metric_1_label\\\":\\\"\\\",\\\"dim3_metric_1_note\\\":\\\"\\\",\\\"dim3_metric_2_num\\\":\\\"\\\",\\\"dim3_metric_2_label\\\":\\\"\\\",\\\"dim3_metric_2_note\\\":\\\"\\\",\\\"dim3_metric_3_num\\\":\\\"\\\",\\\"dim3_metric_3_label\\\":\\\"\\\",\\\"dim3_metric_3_note\\\":\\\"\\\",\\\"dim4_finding_1\\\":\\\"\\\",\\\"dim4_finding_2\\\":\\\"\\\",\\\"dim4_callout_1_label\\\":\\\"\\\",\\\"dim4_callout_1_body\\\":\\\"\\\",\\\"dim4_callout_1_border\\\":\\\"\\\",\\\"dim4_callout_1_bg\\\":\\\"\\\",\\\"dim4_callout_2_label\\\":\\\"\\\",\\\"dim4_callout_2_body\\\":\\\"\\\",\\\"dim4_callout_2_border\\\":\\\"\\\",\\\"dim4_callout_2_bg\\\":\\\"\\\",\\\"dim4_metric_1_num\\\":\\\"\\\",\\\"dim4_metric_1_label\\\":\\\"\\\",\\\"dim4_metric_1_note\\\":\\\"\\\",\\\"dim4_metric_2_num\\\":\\\"\\\",\\\"dim4_metric_2_label\\\":\\\"\\\",\\\"dim4_metric_2_note\\\":\\\"\\\",\\\"dim4_metric_3_num\\\":\\\"\\\",\\\"dim4_metric_3_label\\\":\\\"\\\",\\\"dim4_metric_3_note\\\":\\\"\\\",\\\"dim5_finding_1\\\":\\\"\\\",\\\"dim5_finding_2\\\":\\\"\\\",\\\"dim5_callout_1_label\\\":\\\"\\\",\\\"dim5_callout_1_body\\\":\\\"\\\",\\\"dim5_callout_1_border\\\":\\\"\\\",\\\"dim5_callout_1_bg\\\":\\\"\\\",\\\"dim5_metric_1_num\\\":\\\"\\\",\\\"dim5_metric_1_label\\\":\\\"\\\",\\\"dim5_metric_1_note\\\":\\\"\\\",\\\"dim5_metric_2_num\\\":\\\"\\\",\\\"dim5_metric_2_label\\\":\\\"\\\",\\\"dim5_metric_2_note\\\":\\\"\\\",\\\"dim5_metric_3_num\\\":\\\"\\\",\\\"dim5_metric_3_label\\\":\\\"\\\",\\\"dim5_metric_3_note\\\":\\\"\\\",\\\"dim6_finding_1\\\":\\\"\\\",\\\"dim6_finding_2\\\":\\\"\\\",\\\"dim6_callout_1_label\\\":\\\"\\\",\\\"dim6_callout_1_body\\\":\\\"\\\",\\\"dim6_callout_1_border\\\":\\\"\\\",\\\"dim6_callout_1_bg\\\":\\\"\\\",\\\"dim6_callout_2_label\\\":\\\"\\\",\\\"dim6_callout_2_body\\\":\\\"\\\",\\\"dim6_callout_2_border\\\":\\\"\\\",\\\"dim6_callout_2_bg\\\":\\\"\\\",\\\"dim6_metric_1_num\\\":\\\"\\\",\\\"dim6_metric_1_label\\\":\\\"\\\",\\\"dim6_metric_1_note\\\":\\\"\\\",\\\"dim6_metric_2_num\\\":\\\"\\\",\\\"dim6_metric_2_label\\\":\\\"\\\",\\\"dim6_metric_2_note\\\":\\\"\\\",\\\"dim6_metric_3_num\\\":\\\"\\\",\\\"dim6_metric_3_label\\\":\\\"\\\",\\\"dim6_metric_3_note\\\":\\\"\\\",\\\"action_1_title\\\":\\\"\\\",\\\"action_1_body\\\":\\\"\\\",\\\"action_2_title\\\":\\\"\\\",\\\"action_2_body\\\":\\\"\\\",\\\"action_3_title\\\":\\\"\\\",\\\"action_3_body\\\":\\\"\\\",\\\"action_4_title\\\":\\\"\\\",\\\"action_4_body\\\":\\\"\\\",\\\"action_5_title\\\":\\\"\\\",\\\"action_5_body\\\":\\\"\\\",\\\"upsell_intro\\\":\\\"\\\",\\\"upsell_1_score\\\":\\\"\\\",\\\"upsell_1_title\\\":\\\"\\\",\\\"upsell_1_desc\\\":\\\"\\\",\\\"upsell_2_score\\\":\\\"\\\",\\\"upsell_2_title\\\":\\\"\\\",\\\"upsell_2_desc\\\":\\\"\\\",\\\"dim1_roi_1_type\\\":\\\"\\\",\\\"dim1_roi_1_value\\\":\\\"\\\",\\\"dim1_roi_1_desc\\\":\\\"\\\",\\\"dim1_roi_2_type\\\":\\\"\\\",\\\"dim1_roi_2_value\\\":\\\"\\\",\\\"dim1_roi_2_desc\\\":\\\"\\\",\\\"dim1_roi_3_type\\\":\\\"\\\",\\\"dim1_roi_3_value\\\":\\\"\\\",\\\"dim1_roi_3_desc\\\":\\\"\\\",\\\"dim2_roi_1_type\\\":\\\"\\\",\\\"dim2_roi_1_value\\\":\\\"\\\",\\\"dim2_roi_1_desc\\\":\\\"\\\",\\\"dim2_roi_2_type\\\":\\\"\\\",\\\"dim2_roi_2_value\\\":\\\"\\\",\\\"dim2_roi_2_desc\\\":\\\"\\\",\\\"dim2_roi_3_type\\\":\\\"\\\",\\\"dim2_roi_3_value\\\":\\\"\\\",\\\"dim2_roi_3_desc\\\":\\\"\\\",\\\"dim3_roi_1_type\\\":\\\"\\\",\\\"dim3_roi_1_value\\\":\\\"\\\",\\\"dim3_roi_1_desc\\\":\\\"\\\",\\\"dim3_roi_2_type\\\":\\\"\\\",\\\"dim3_roi_2_value\\\":\\\"\\\",\\\"dim3_roi_2_desc\\\":\\\"\\\",\\\"dim3_roi_3_type\\\":\\\"\\\",\\\"dim3_roi_3_value\\\":\\\"\\\",\\\"dim3_roi_3_desc\\\":\\\"\\\",\\\"dim4_roi_1_type\\\":\\\"\\\",\\\"dim4_roi_1_value\\\":\\\"\\\",\\\"dim4_roi_1_desc\\\":\\\"\\\",\\\"dim4_roi_2_type\\\":\\\"\\\",\\\"dim4_roi_2_value\\\":\\\"\\\",\\\"dim4_roi_2_desc\\\":\\\"\\\",\\\"dim4_roi_3_type\\\":\\\"\\\",\\\"dim4_roi_3_value\\\":\\\"\\\",\\\"dim4_roi_3_desc\\\":\\\"\\\",\\\"dim5_roi_1_type\\\":\\\"\\\",\\\"dim5_roi_1_value\\\":\\\"\\\",\\\"dim5_roi_1_desc\\\":\\\"\\\",\\\"dim5_roi_2_type\\\":\\\"\\\",\\\"dim5_roi_2_value\\\":\\\"\\\",\\\"dim5_roi_2_desc\\\":\\\"\\\",\\\"dim5_roi_3_type\\\":\\\"\\\",\\\"dim5_roi_3_value\\\":\\\"\\\",\\\"dim5_roi_3_desc\\\":\\\"\\\",\\\"dim6_roi_1_type\\\":\\\"\\\",\\\"dim6_roi_1_value\\\":\\\"\\\",\\\"dim6_roi_1_desc\\\":\\\"\\\",\\\"dim6_roi_2_type\\\":\\\"\\\",\\\"dim6_roi_2_value\\\":\\\"\\\",\\\"dim6_roi_2_desc\\\":\\\"\\\",\\\"dim6_roi_3_type\\\":\\\"\\\",\\\"dim6_roi_3_value\\\":\\\"\\\",\\\"dim6_roi_3_desc\\\":\\\"\\\",\\\"dim1_finding_3\\\":\\\"\\\",\\\"dim1_mat_1_active\\\":\\\"\\\",\\\"dim1_mat_1_bg\\\":\\\"\\\",\\\"dim1_mat_1_text\\\":\\\"\\\",\\\"dim1_mat_1_val\\\":\\\"\\\",\\\"dim1_mat_2_active\\\":\\\"\\\",\\\"dim1_mat_2_bg\\\":\\\"\\\",\\\"dim1_mat_2_text\\\":\\\"\\\",\\\"dim1_mat_2_val\\\":\\\"\\\",\\\"dim1_mat_3_active\\\":\\\"\\\",\\\"dim1_mat_3_bg\\\":\\\"\\\",\\\"dim1_mat_3_text\\\":\\\"\\\",\\\"dim1_mat_3_val\\\":\\\"\\\",\\\"dim1_mat_4_active\\\":\\\"\\\",\\\"dim1_mat_4_bg\\\":\\\"\\\",\\\"dim1_mat_4_text\\\":\\\"\\\",\\\"dim1_mat_4_val\\\":\\\"\\\",\\\"dim1_mat_5_active\\\":\\\"\\\",\\\"dim1_mat_5_bg\\\":\\\"\\\",\\\"dim1_mat_5_text\\\":\\\"\\\",\\\"dim1_mat_5_val\\\":\\\"\\\",\\\"dim1_wgl_1\\\":\\\"\\\",\\\"dim1_wgl_2\\\":\\\"\\\",\\\"dim1_wgl_3\\\":\\\"\\\",\\\"dim2_finding_3\\\":\\\"\\\",\\\"dim2_mat_1_active\\\":\\\"\\\",\\\"dim2_mat_1_bg\\\":\\\"\\\",\\\"dim2_mat_1_text\\\":\\\"\\\",\\\"dim2_mat_1_val\\\":\\\"\\\",\\\"dim2_mat_2_active\\\":\\\"\\\",\\\"dim2_mat_2_bg\\\":\\\"\\\",\\\"dim2_mat_2_text\\\":\\\"\\\",\\\"dim2_mat_2_val\\\":\\\"\\\",\\\"dim2_mat_3_active\\\":\\\"\\\",\\\"dim2_mat_3_bg\\\":\\\"\\\",\\\"dim2_mat_3_text\\\":\\\"\\\",\\\"dim2_mat_3_val\\\":\\\"\\\",\\\"dim2_mat_4_active\\\":\\\"\\\",\\\"dim2_mat_4_bg\\\":\\\"\\\",\\\"dim2_mat_4_text\\\":\\\"\\\",\\\"dim2_mat_4_val\\\":\\\"\\\",\\\"dim2_mat_5_active\\\":\\\"\\\",\\\"dim2_mat_5_bg\\\":\\\"\\\",\\\"dim2_mat_5_text\\\":\\\"\\\",\\\"dim2_mat_5_val\\\":\\\"\\\",\\\"dim2_wgl_1\\\":\\\"\\\",\\\"dim2_wgl_2\\\":\\\"\\\",\\\"dim2_wgl_3\\\":\\\"\\\",\\\"dim3_finding_3\\\":\\\"\\\",\\\"dim3_mat_1_active\\\":\\\"\\\",\\\"dim3_mat_1_bg\\\":\\\"\\\",\\\"dim3_mat_1_text\\\":\\\"\\\",\\\"dim3_mat_1_val\\\":\\\"\\\",\\\"dim3_mat_2_active\\\":\\\"\\\",\\\"dim3_mat_2_bg\\\":\\\"\\\",\\\"dim3_mat_2_text\\\":\\\"\\\",\\\"dim3_mat_2_val\\\":\\\"\\\",\\\"dim3_mat_3_active\\\":\\\"\\\",\\\"dim3_mat_3_bg\\\":\\\"\\\",\\\"dim3_mat_3_text\\\":\\\"\\\",\\\"dim3_mat_3_val\\\":\\\"\\\",\\\"dim3_mat_4_active\\\":\\\"\\\",\\\"dim3_mat_4_bg\\\":\\\"\\\",\\\"dim3_mat_4_text\\\":\\\"\\\",\\\"dim3_mat_4_val\\\":\\\"\\\",\\\"dim3_mat_5_active\\\":\\\"\\\",\\\"dim3_mat_5_bg\\\":\\\"\\\",\\\"dim3_mat_5_text\\\":\\\"\\\",\\\"dim3_mat_5_val\\\":\\\"\\\",\\\"dim3_wgl_1\\\":\\\"\\\",\\\"dim3_wgl_2\\\":\\\"\\\",\\\"dim3_wgl_3\\\":\\\"\\\",\\\"dim4_finding_3\\\":\\\"\\\",\\\"dim4_mat_1_active\\\":\\\"\\\",\\\"dim4_mat_1_bg\\\":\\\"\\\",\\\"dim4_mat_1_text\\\":\\\"\\\",\\\"dim4_mat_1_val\\\":\\\"\\\",\\\"dim4_mat_2_active\\\":\\\"\\\",\\\"dim4_mat_2_bg\\\":\\\"\\\",\\\"dim4_mat_2_text\\\":\\\"\\\",\\\"dim4_mat_2_val\\\":\\\"\\\",\\\"dim4_mat_3_active\\\":\\\"\\\",\\\"dim4_mat_3_bg\\\":\\\"\\\",\\\"dim4_mat_3_text\\\":\\\"\\\",\\\"dim4_mat_3_val\\\":\\\"\\\",\\\"dim4_mat_4_active\\\":\\\"\\\",\\\"dim4_mat_4_bg\\\":\\\"\\\",\\\"dim4_mat_4_text\\\":\\\"\\\",\\\"dim4_mat_4_val\\\":\\\"\\\",\\\"dim4_mat_5_active\\\":\\\"\\\",\\\"dim4_mat_5_bg\\\":\\\"\\\",\\\"dim4_mat_5_text\\\":\\\"\\\",\\\"dim4_mat_5_val\\\":\\\"\\\",\\\"dim4_wgl_1\\\":\\\"\\\",\\\"dim4_wgl_2\\\":\\\"\\\",\\\"dim4_wgl_3\\\":\\\"\\\",\\\"dim5_finding_3\\\":\\\"\\\",\\\"dim5_mat_1_active\\\":\\\"\\\",\\\"dim5_mat_1_bg\\\":\\\"\\\",\\\"dim5_mat_1_text\\\":\\\"\\\",\\\"dim5_mat_1_val\\\":\\\"\\\",\\\"dim5_mat_2_active\\\":\\\"\\\",\\\"dim5_mat_2_bg\\\":\\\"\\\",\\\"dim5_mat_2_text\\\":\\\"\\\",\\\"dim5_mat_2_val\\\":\\\"\\\",\\\"dim5_mat_3_active\\\":\\\"\\\",\\\"dim5_mat_3_bg\\\":\\\"\\\",\\\"dim5_mat_3_text\\\":\\\"\\\",\\\"dim5_mat_3_val\\\":\\\"\\\",\\\"dim5_mat_4_active\\\":\\\"\\\",\\\"dim5_mat_4_bg\\\":\\\"\\\",\\\"dim5_mat_4_text\\\":\\\"\\\",\\\"dim5_mat_4_val\\\":\\\"\\\",\\\"dim5_mat_5_active\\\":\\\"\\\",\\\"dim5_mat_5_bg\\\":\\\"\\\",\\\"dim5_mat_5_text\\\":\\\"\\\",\\\"dim5_mat_5_val\\\":\\\"\\\",\\\"dim5_wgl_1\\\":\\\"\\\",\\\"dim5_wgl_2\\\":\\\"\\\",\\\"dim5_wgl_3\\\":\\\"\\\",\\\"dim6_finding_3\\\":\\\"\\\",\\\"dim6_mat_1_active\\\":\\\"\\\",\\\"dim6_mat_1_bg\\\":\\\"\\\",\\\"dim6_mat_1_text\\\":\\\"\\\",\\\"dim6_mat_1_val\\\":\\\"\\\",\\\"dim6_mat_2_active\\\":\\\"\\\",\\\"dim6_mat_2_bg\\\":\\\"\\\",\\\"dim6_mat_2_text\\\":\\\"\\\",\\\"dim6_mat_2_val\\\":\\\"\\\",\\\"dim6_mat_3_active\\\":\\\"\\\",\\\"dim6_mat_3_bg\\\":\\\"\\\",\\\"dim6_mat_3_text\\\":\\\"\\\",\\\"dim6_mat_3_val\\\":\\\"\\\",\\\"dim6_mat_4_active\\\":\\\"\\\",\\\"dim6_mat_4_bg\\\":\\\"\\\",\\\"dim6_mat_4_text\\\":\\\"\\\",\\\"dim6_mat_4_val\\\":\\\"\\\",\\\"dim6_mat_5_active\\\":\\\"\\\",\\\"dim6_mat_5_bg\\\":\\\"\\\",\\\"dim6_mat_5_text\\\":\\\"\\\",\\\"dim6_mat_5_val\\\":\\\"\\\",\\\"dim6_wgl_1\\\":\\\"\\\",\\\"dim6_wgl_2\\\":\\\"\\\",\\\"dim6_wgl_3\\\":\\\"\\\",\\\"dim5_callout_2_label\\\":\\\"\\\",\\\"dim5_callout_2_body\\\":\\\"\\\",\\\"dim5_callout_2_border\\\":\\\"\\\",\\\"dim5_callout_2_bg\\\":\\\"\\\",\\\"dim6_callout_2_label\\\":\\\"\\\",\\\"dim6_callout_2_body\\\":\\\"\\\",\\\"dim6_callout_2_border\\\":\\\"\\\",\\\"dim6_callout_2_bg\\\":\\\"\\\"}\", \"messages\": [{\"role\": \"user\", \"content\": \"Analyse the following business assessment and return the JSON diagnostic report.\\n\\nBUSINESS DETAILS\\nBusiness Name: test\\nIndustry: Construction\\nYears Operating: 7\\nAnnual Revenue: $10M\\nStaff Count: 20\\nDivisions: 3\\nDivision Names: Demolition, Excavation, Trucking\\n\\nFINANCIAL DATA\\nBilling process owner: MD\\nInvoice lag days: 14\\nDebtor days: 35\\nVariation capture: No\\nBilling process: MD initiates all invoices manually\\nProcesses documented: No\\nBilling backup: Nobody\\n\\nPEOPLE\\nRole descriptions: No\\nKey people: MD, Operations Lead\\nOnboarding: No\\nPerformance clarity: Informal\\n\\nTECHNOLOGY\\nJob management: Aroflo\\nAccounting: Xero\\nSystems integrated: No\\nManual hours per week: 8\\n\\nSTRATEGY\\n12 month goal: Reduce MD dependency\\nDocumented: No\\nGoal owners: No\\nLeadership cadence: No regular meetings\\n\\nDATA\\nFinancial visibility: MD only\\nKPIs tracked: None\\nOperational decisions: Intuition\\n\\nSCALABILITY\\nGrowth barriers: MD dependency, finding good staff\\nFounder involvement: Daily operations\\nRecent hires: PM hire\\n36 month vision: Exit or capital event\"}]}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "authenticationType": {
+              "label": "No authenticationUse when no credentials are required for the request."
+            },
+            "tlsType": {
+              "label": "Empty"
+            },
+            "proxyKeychain": {
+              "label": "Choose a key"
+            }
+          },
+          "expect": {
+            "method": {
+              "mode": "chose",
+              "label": "POST"
+            },
+            "headers": {
+              "mode": "chose",
+              "items": [
+                null,
+                null,
+                null
+              ]
+            },
+            "queryParameters": {
+              "mode": "chose"
+            },
+            "contentType": {
+              "label": "application/jsonEnter data in the JSON format, as a string or using a data structure."
+            },
+            "parseResponse": {
+              "mode": "chose"
+            },
+            "stopOnHttpError": {
+              "mode": "chose"
+            },
+            "allowRedirects": {
+              "mode": "chose"
+            },
+            "shareCookies": {
+              "mode": "chose"
+            },
+            "requestCompressedContent": {
+              "mode": "chose"
+            },
+            "inputMethod": {
+              "label": "JSON stringEnter the JSON body as a raw text string. If values contain JSON reserved characters, you must escape them manually."
+            },
+            "paginationType": {
+              "label": "Empty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authenticationType",
+            "type": "select",
+            "label": "Authentication type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "noAuth",
+                "apiKey",
+                "basicAuth",
+                "oAuth"
+              ]
+            }
+          },
+          {
+            "name": "tlsType",
+            "type": "select",
+            "label": "Transport layer security (TLS)",
+            "validate": {
+              "enum": [
+                "mTls",
+                "tls"
+              ]
+            }
+          },
+          {
+            "name": "proxyKeychain",
+            "type": "keychain:proxy",
+            "label": "Proxy"
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "get",
+                "head",
+                "post",
+                "put",
+                "patch",
+                "delete",
+                "options"
+              ]
+            }
+          },
+          {
+            "name": "headers",
+            "type": "array",
+            "label": "Headers",
+            "spec": {
+              "name": "value",
+              "label": "Header",
+              "type": "collection",
+              "spec": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "required": true,
+                  "validate": {
+                    "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+                  }
+                },
+                {
+                  "name": "value",
+                  "label": "Value",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          {
+            "name": "queryParameters",
+            "type": "array",
+            "label": "Query parameters",
+            "spec": {
+              "name": "value",
+              "label": "Parameter",
+              "type": "collection",
+              "spec": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "value",
+                  "label": "Value",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          {
+            "name": "contentType",
+            "type": "select",
+            "label": "Body content type",
+            "validate": {
+              "enum": [
+                "json",
+                "multipart",
+                "urlEncoded",
+                "custom"
+              ]
+            }
+          },
+          {
+            "name": "parseResponse",
+            "type": "boolean",
+            "label": "Parse response",
+            "required": true
+          },
+          {
+            "name": "stopOnHttpError",
+            "type": "boolean",
+            "label": "Return error if HTTP request fails",
+            "required": true
+          },
+          {
+            "name": "timeout",
+            "type": "uinteger",
+            "label": "Timeout",
+            "validate": {
+              "min": 1,
+              "max": 300
+            }
+          },
+          {
+            "name": "allowRedirects",
+            "type": "boolean",
+            "label": "Allow redirects",
+            "required": true
+          },
+          {
+            "name": "shareCookies",
+            "type": "boolean",
+            "label": "Share cookies with other HTTP modules",
+            "required": true
+          },
+          {
+            "name": "requestCompressedContent",
+            "type": "boolean",
+            "label": "Request compressed content",
+            "required": true
+          },
+          {
+            "name": "inputMethod",
+            "type": "select",
+            "label": "Body input method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "dataStructure",
+                "jsonString"
+              ]
+            }
+          },
+          {
+            "name": "jsonStringBodyContent",
+            "type": "text",
+            "label": "Body content",
+            "required": true
+          },
+          {
+            "name": "paginationType",
+            "type": "select",
+            "label": "Pagination type",
+            "validate": {
+              "enum": [
+                "offsetBased",
+                "pageBased",
+                "urlBased",
+                "tokenBased"
+              ]
+            }
+          }
+        ],
+        "interface": [
+          {
+            "name": "data",
+            "label": "Data",
+            "type": "any"
+          },
+          {
+            "name": "statusCode",
+            "label": "Status Code",
+            "type": "number"
+          },
+          {
+            "name": "headers",
+            "label": "Headers",
+            "type": "collection",
+            "spec": [
+              {
+                "name": "content-length",
+                "label": "Content-Length",
+                "type": "text"
+              },
+              {
+                "name": "content-encoding",
+                "label": "Content-Encoding",
+                "type": "text"
+              },
+              {
+                "name": "content-type",
+                "label": "Content-Type",
+                "type": "text"
+              },
+              {
+                "name": "server",
+                "label": "Server",
+                "type": "text"
+              },
+              {
+                "name": "cache-control",
+                "label": "Cache-Control",
+                "type": "text"
+              },
+              {
+                "name": "set-cookie",
+                "label": "Set-Cookie",
+                "type": "array",
+                "spec": {
+                  "type": "text"
+                }
+              }
+            ]
+          }
+        ],
+        "advanced": true
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": 293762
+      },
+      "mapper": {
+        "json": "{{3.data.content[1].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "type": {
+              "label": "Praxis AI report"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "type": "udt",
+            "label": "Data structure"
+          }
+        ],
+        "expect": [
+          {
+            "name": "json",
+            "type": "text",
+            "label": "JSON string",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "business_name",
+            "label": "Business name",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "industry",
+            "label": "Industry",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "report_date",
+            "label": "Report date",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "revenue_band",
+            "label": "Revenue band",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "staff_count",
+            "label": "Staff count",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "years_operating",
+            "label": "Years operating",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "overall_score",
+            "label": "Overall score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "report_headline",
+            "label": "Report headline",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "report_subheadline",
+            "label": "Report subheadline",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "executive_summary",
+            "label": "Executive summary",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "chart_image",
+            "label": "Chart image",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_score",
+            "label": "Dim 1 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_status",
+            "label": "Dim 1 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_score",
+            "label": "Dim 2 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_status",
+            "label": "Dim 2 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_score",
+            "label": "Dim 3 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_status",
+            "label": "Dim 3 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_score",
+            "label": "Dim 4 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_status",
+            "label": "Dim 4 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_score",
+            "label": "Dim 5 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_status",
+            "label": "Dim 5 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_score",
+            "label": "Dim 6 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_status",
+            "label": "Dim 6 status",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_finding_1",
+            "label": "Dim 1 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_finding_2",
+            "label": "Dim 1 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_callout_1_label",
+            "label": "Dim 1 callout 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_callout_1_body",
+            "label": "Dim 1 callout 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_callout_1_type",
+            "label": "Dim 1 callout 1 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_1_num",
+            "label": "Dim 1 metric 1 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_1_label",
+            "label": "Dim 1 metric 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_1_note",
+            "label": "Dim 1 metric 1 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_2_num",
+            "label": "Dim 1 metric 2 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_2_label",
+            "label": "Dim 1 metric 2 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_2_note",
+            "label": "Dim 1 metric 2 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_3_num",
+            "label": "Dim 1 metric 3 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_3_label",
+            "label": "Dim 1 metric 3 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim1_metric_3_note",
+            "label": "Dim 1 metric 3 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_finding_1",
+            "label": "Dim 2 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_finding_2",
+            "label": "Dim 2 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_1_label",
+            "label": "Dim 2 callout 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_1_body",
+            "label": "Dim 2 callout 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_1_type",
+            "label": "Dim 2 callout 1 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_2_label",
+            "label": "Dim 2 callout 2 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_2_body",
+            "label": "Dim 2 callout 2 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim2_callout_2_type",
+            "label": "Dim 2 callout 2 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_finding_1",
+            "label": "Dim 3 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_finding_2",
+            "label": "Dim 3 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_callout_1_label",
+            "label": "Dim 3 callout 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_callout_1_body",
+            "label": "Dim 3 callout 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim3_callout_1_type",
+            "label": "Dim 3 callout 1 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_finding_1",
+            "label": "Dim 4 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_finding_2",
+            "label": "Dim 4 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_callout_1_label",
+            "label": "Dim 4 callout 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_callout_1_body",
+            "label": "Dim 4 callout 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim4_callout_1_type",
+            "label": "Dim 4 callout 1 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_finding_1",
+            "label": "Dim 5 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_finding_2",
+            "label": "Dim 5 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_1_num",
+            "label": "Dim 5 metric 1 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_1_label",
+            "label": "Dim 5 metric 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_1_note",
+            "label": "Dim 5 metric 1 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_2_num",
+            "label": "Dim 5 metric 2 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_2_label",
+            "label": "Dim 5 metric 2 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_2_note",
+            "label": "Dim 5 metric 2 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_3_num",
+            "label": "Dim 5 metric 3 num",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_3_label",
+            "label": "Dim 5 metric 3 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim5_metric_3_note",
+            "label": "Dim 5 metric 3 note",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_finding_1",
+            "label": "Dim 6 finding 1",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_finding_2",
+            "label": "Dim 6 finding 2",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_callout_1_label",
+            "label": "Dim 6 callout 1 label",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_callout_1_body",
+            "label": "Dim 6 callout 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "dim6_callout_1_type",
+            "label": "Dim 6 callout 1 type",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_1_title",
+            "label": "Action 1 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_1_body",
+            "label": "Action 1 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_2_title",
+            "label": "Action 2 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_2_body",
+            "label": "Action 2 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_3_title",
+            "label": "Action 3 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_3_body",
+            "label": "Action 3 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_4_title",
+            "label": "Action 4 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_4_body",
+            "label": "Action 4 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_5_title",
+            "label": "Action 5 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "action_5_body",
+            "label": "Action 5 body",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_intro",
+            "label": "Upsell intro",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_1_score",
+            "label": "Upsell 1 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_1_title",
+            "label": "Upsell 1 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_1_desc",
+            "label": "Upsell 1 desc",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_2_score",
+            "label": "Upsell 2 score",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_2_title",
+            "label": "Upsell 2 title",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "name": "upsell_2_desc",
+            "label": "Upsell 2 desc",
+            "help": "",
+            "type": "text",
+            "default": null,
+            "required": false,
+            "multiline": false
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "module": "json:CreateJSON",
+      "version": 1,
+      "parameters": {
+        "type": 293762,
+        "space": ""
+      },
+      "mapper": {
+        "business_name": "{{4.business_name}}",
+        "industry": "{{4.industry}}",
+        "report_date": "{{4.report_date}}",
+        "revenue_band": "{{4.revenue_band}}",
+        "staff_count": "{{4.staff_count}}",
+        "years_operating": "{{4.years_operating}}",
+        "overall_score": "{{4.overall_score}}",
+        "report_headline": "{{4.report_headline}}",
+        "report_subheadline": "{{4.report_subheadline}}",
+        "executive_summary": "{{4.executive_summary}}",
+        "dim1_score": "{{4.dim1_score}}",
+        "dim1_status": "{{4.dim1_status}}",
+        "dim2_score": "{{4.dim2_score}}",
+        "dim2_status": "{{4.dim2_status}}",
+        "dim3_score": "{{4.dim3_score}}",
+        "dim3_status": "{{4.dim3_status}}",
+        "dim4_score": "{{4.dim4_score}}",
+        "dim4_status": "{{4.dim4_status}}",
+        "dim5_score": "{{4.dim5_score}}",
+        "dim5_status": "{{4.dim5_status}}",
+        "dim6_score": "{{4.dim6_score}}",
+        "dim6_status": "{{4.dim6_status}}",
+        "dim1_finding_1": "{{4.dim1_finding_1}}",
+        "dim1_finding_2": "{{4.dim1_finding_2}}",
+        "dim1_callout_1_label": "{{4.dim1_callout_1_label}}",
+        "dim1_callout_1_body": "{{4.dim1_callout_1_body}}",
+        "dim1_metric_1_num": "{{4.dim1_metric_1_num}}",
+        "dim1_metric_1_label": "{{4.dim1_metric_1_label}}",
+        "dim1_metric_1_note": "{{4.dim1_metric_1_note}}",
+        "dim1_metric_2_num": "{{4.dim1_metric_2_num}}",
+        "dim1_metric_2_label": "{{4.dim1_metric_2_label}}",
+        "dim1_metric_2_note": "{{4.dim1_metric_2_note}}",
+        "dim1_metric_3_num": "{{4.dim1_metric_3_num}}",
+        "dim1_metric_3_label": "{{4.dim1_metric_3_label}}",
+        "dim1_metric_3_note": "{{4.dim1_metric_3_note}}",
+        "dim2_finding_1": "{{4.dim2_finding_1}}",
+        "dim2_finding_2": "{{4.dim2_finding_2}}",
+        "dim2_callout_1_label": "{{4.dim2_callout_1_label}}",
+        "dim2_callout_1_body": "{{4.dim2_callout_1_body}}",
+        "dim2_callout_2_label": "{{4.dim2_callout_2_label}}",
+        "dim2_callout_2_body": "{{4.dim2_callout_2_body}}",
+        "dim3_finding_1": "{{4.dim3_finding_1}}",
+        "dim3_finding_2": "{{4.dim3_finding_2}}",
+        "dim3_callout_1_label": "{{4.dim3_callout_1_label}}",
+        "dim3_callout_1_body": "{{4.dim3_callout_1_body}}",
+        "dim4_finding_1": "{{4.dim4_finding_1}}",
+        "dim4_finding_2": "{{4.dim4_finding_2}}",
+        "dim4_callout_1_label": "{{4.dim4_callout_1_label}}",
+        "dim4_callout_1_body": "{{4.dim4_callout_1_body}}",
+        "dim5_finding_1": "{{4.dim5_finding_1}}",
+        "dim5_finding_2": "{{4.dim5_finding_2}}",
+        "dim5_metric_1_num": "{{4.dim5_metric_1_num}}",
+        "dim5_metric_1_label": "{{4.dim5_metric_1_label}}",
+        "dim5_metric_1_note": "{{4.dim5_metric_1_note}}",
+        "dim5_metric_2_num": "{{4.dim5_metric_2_num}}",
+        "dim5_metric_2_label": "{{4.dim5_metric_2_label}}",
+        "dim5_metric_2_note": "{{4.dim5_metric_2_note}}",
+        "dim5_metric_3_num": "{{4.dim5_metric_3_num}}",
+        "dim5_metric_3_label": "{{4.dim5_metric_3_label}}",
+        "dim5_metric_3_note": "{{4.dim5_metric_3_note}}",
+        "dim6_finding_1": "{{4.dim6_finding_1}}",
+        "dim6_finding_2": "{{4.dim6_finding_2}}",
+        "dim6_callout_1_label": "{{4.dim6_callout_1_label}}",
+        "dim6_callout_1_body": "{{4.dim6_callout_1_body}}",
+        "action_1_title": "{{4.action_1_title}}",
+        "action_1_body": "{{4.action_1_body}}",
+        "action_2_title": "{{4.action_2_title}}",
+        "action_2_body": "{{4.action_2_body}}",
+        "action_3_title": "{{4.action_3_title}}",
+        "action_3_body": "{{4.action_3_body}}",
+        "action_4_title": "{{4.action_4_title}}",
+        "action_4_body": "{{4.action_4_body}}",
+        "action_5_title": "{{4.action_5_title}}",
+        "action_5_body": "{{4.action_5_body}}",
+        "upsell_intro": "{{4.upsell_intro}}",
+        "upsell_1_score": "{{4.upsell_1_score}}",
+        "upsell_1_title": "{{4.upsell_1_title}}",
+        "upsell_1_desc": "{{4.upsell_1_desc}}",
+        "upsell_2_score": "{{4.upsell_2_score}}",
+        "upsell_2_title": "{{4.upsell_2_title}}",
+        "upsell_2_desc": "{{4.upsell_2_desc}}",
+        "dim1_callout_1_border": "{{4.dim1_callout_1_border}}",
+        "dim1_callout_1_bg": "{{4.dim1_callout_1_bg}}",
+        "dim1_callout_2_label": "{{4.dim1_callout_2_label}}",
+        "dim1_callout_2_body": "{{4.dim1_callout_2_body}}",
+        "dim1_callout_2_border": "{{4.dim1_callout_2_border}}",
+        "dim1_callout_2_bg": "{{4.dim1_callout_2_bg}}",
+        "dim2_callout_1_border": "{{4.dim2_callout_1_border}}",
+        "dim2_callout_1_bg": "{{4.dim2_callout_1_bg}}",
+        "dim2_callout_2_border": "{{4.dim2_callout_2_border}}",
+        "dim2_callout_2_bg": "{{4.dim2_callout_2_bg}}",
+        "dim3_callout_1_border": "{{4.dim3_callout_1_border}}",
+        "dim3_callout_1_bg": "{{4.dim3_callout_1_bg}}",
+        "dim3_callout_2_label": "{{4.dim3_callout_2_label}}",
+        "dim3_callout_2_body": "{{4.dim3_callout_2_body}}",
+        "dim3_callout_2_border": "{{4.dim3_callout_2_border}}",
+        "dim3_callout_2_bg": "{{4.dim3_callout_2_bg}}",
+        "dim4_callout_1_border": "{{4.dim4_callout_1_border}}",
+        "dim4_callout_1_bg": "{{4.dim4_callout_1_bg}}",
+        "dim4_callout_2_label": "{{4.dim4_callout_2_label}}",
+        "dim4_callout_2_body": "{{4.dim4_callout_2_body}}",
+        "dim4_callout_2_border": "{{4.dim4_callout_2_border}}",
+        "dim4_callout_2_bg": "{{4.dim4_callout_2_bg}}",
+        "dim5_callout_1_border": "{{4.dim5_callout_1_border}}",
+        "dim5_callout_1_bg": "{{4.dim5_callout_1_bg}}",
+        "dim5_callout_2_label": "{{4.dim5_callout_2_label}}",
+        "dim5_callout_2_body": "{{4.dim5_callout_2_body}}",
+        "dim5_callout_2_border": "{{4.dim5_callout_2_border}}",
+        "dim5_callout_2_bg": "{{4.dim5_callout_2_bg}}",
+        "dim6_callout_1_border": "{{4.dim6_callout_1_border}}",
+        "dim6_callout_1_bg": "{{4.dim6_callout_1_bg}}",
+        "dim6_callout_2_label": "{{4.dim6_callout_2_label}}",
+        "dim6_callout_2_body": "{{4.dim6_callout_2_body}}",
+        "dim6_callout_2_border": "{{4.dim6_callout_2_border}}",
+        "dim6_callout_2_bg": "{{4.dim6_callout_2_bg}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "type": {
+              "label": "Praxis AI report"
+            },
+            "space": {
+              "label": "Empty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "type": "udt",
+            "label": "Data structure",
+            "required": true
+          },
+          {
+            "name": "space",
+            "type": "select",
+            "label": "Indentation",
+            "validate": {
+              "enum": [
+                "tab",
+                "2",
+                "4"
+              ]
+            }
+          }
+        ],
+        "expect": [
+          {
+            "name": "business_name",
+            "type": "text",
+            "label": "Business name"
+          },
+          {
+            "name": "industry",
+            "type": "text",
+            "label": "Industry"
+          },
+          {
+            "name": "report_date",
+            "type": "text",
+            "label": "Report date"
+          },
+          {
+            "name": "revenue_band",
+            "type": "text",
+            "label": "Revenue band"
+          },
+          {
+            "name": "staff_count",
+            "type": "text",
+            "label": "Staff count"
+          },
+          {
+            "name": "years_operating",
+            "type": "text",
+            "label": "Years operating"
+          },
+          {
+            "name": "overall_score",
+            "type": "text",
+            "label": "Overall score"
+          },
+          {
+            "name": "report_headline",
+            "type": "text",
+            "label": "Report headline"
+          },
+          {
+            "name": "report_subheadline",
+            "type": "text",
+            "label": "Report subheadline"
+          },
+          {
+            "name": "executive_summary",
+            "type": "text",
+            "label": "Executive summary"
+          },
+          {
+            "name": "chart_image",
+            "type": "text",
+            "label": "Chart image"
+          },
+          {
+            "name": "dim1_score",
+            "type": "text",
+            "label": "Dim 1 score"
+          },
+          {
+            "name": "dim1_status",
+            "type": "text",
+            "label": "Dim 1 status"
+          },
+          {
+            "name": "dim2_score",
+            "type": "text",
+            "label": "Dim 2 score"
+          },
+          {
+            "name": "dim2_status",
+            "type": "text",
+            "label": "Dim 2 status"
+          },
+          {
+            "name": "dim3_score",
+            "type": "text",
+            "label": "Dim 3 score"
+          },
+          {
+            "name": "dim3_status",
+            "type": "text",
+            "label": "Dim 3 status"
+          },
+          {
+            "name": "dim4_score",
+            "type": "text",
+            "label": "Dim 4 score"
+          },
+          {
+            "name": "dim4_status",
+            "type": "text",
+            "label": "Dim 4 status"
+          },
+          {
+            "name": "dim5_score",
+            "type": "text",
+            "label": "Dim 5 score"
+          },
+          {
+            "name": "dim5_status",
+            "type": "text",
+            "label": "Dim 5 status"
+          },
+          {
+            "name": "dim6_score",
+            "type": "text",
+            "label": "Dim 6 score"
+          },
+          {
+            "name": "dim6_status",
+            "type": "text",
+            "label": "Dim 6 status"
+          },
+          {
+            "name": "dim1_finding_1",
+            "type": "text",
+            "label": "Dim 1 finding 1"
+          },
+          {
+            "name": "dim1_finding_2",
+            "type": "text",
+            "label": "Dim 1 finding 2"
+          },
+          {
+            "name": "dim1_callout_1_label",
+            "type": "text",
+            "label": "Dim 1 callout 1 label"
+          },
+          {
+            "name": "dim1_callout_1_body",
+            "type": "text",
+            "label": "Dim 1 callout 1 body"
+          },
+          {
+            "name": "dim1_callout_1_type",
+            "type": "text",
+            "label": "Dim 1 callout 1 type"
+          },
+          {
+            "name": "dim1_metric_1_num",
+            "type": "text",
+            "label": "Dim 1 metric 1 num"
+          },
+          {
+            "name": "dim1_metric_1_label",
+            "type": "text",
+            "label": "Dim 1 metric 1 label"
+          },
+          {
+            "name": "dim1_metric_1_note",
+            "type": "text",
+            "label": "Dim 1 metric 1 note"
+          },
+          {
+            "name": "dim1_metric_2_num",
+            "type": "text",
+            "label": "Dim 1 metric 2 num"
+          },
+          {
+            "name": "dim1_metric_2_label",
+            "type": "text",
+            "label": "Dim 1 metric 2 label"
+          },
+          {
+            "name": "dim1_metric_2_note",
+            "type": "text",
+            "label": "Dim 1 metric 2 note"
+          },
+          {
+            "name": "dim1_metric_3_num",
+            "type": "text",
+            "label": "Dim 1 metric 3 num"
+          },
+          {
+            "name": "dim1_metric_3_label",
+            "type": "text",
+            "label": "Dim 1 metric 3 label"
+          },
+          {
+            "name": "dim1_metric_3_note",
+            "type": "text",
+            "label": "Dim 1 metric 3 note"
+          },
+          {
+            "name": "dim2_finding_1",
+            "type": "text",
+            "label": "Dim 2 finding 1"
+          },
+          {
+            "name": "dim2_finding_2",
+            "type": "text",
+            "label": "Dim 2 finding 2"
+          },
+          {
+            "name": "dim2_callout_1_label",
+            "type": "text",
+            "label": "Dim 2 callout 1 label"
+          },
+          {
+            "name": "dim2_callout_1_body",
+            "type": "text",
+            "label": "Dim 2 callout 1 body"
+          },
+          {
+            "name": "dim2_callout_1_type",
+            "type": "text",
+            "label": "Dim 2 callout 1 type"
+          },
+          {
+            "name": "dim2_callout_2_label",
+            "type": "text",
+            "label": "Dim 2 callout 2 label"
+          },
+          {
+            "name": "dim2_callout_2_body",
+            "type": "text",
+            "label": "Dim 2 callout 2 body"
+          },
+          {
+            "name": "dim2_callout_2_type",
+            "type": "text",
+            "label": "Dim 2 callout 2 type"
+          },
+          {
+            "name": "dim3_finding_1",
+            "type": "text",
+            "label": "Dim 3 finding 1"
+          },
+          {
+            "name": "dim3_finding_2",
+            "type": "text",
+            "label": "Dim 3 finding 2"
+          },
+          {
+            "name": "dim3_callout_1_label",
+            "type": "text",
+            "label": "Dim 3 callout 1 label"
+          },
+          {
+            "name": "dim3_callout_1_body",
+            "type": "text",
+            "label": "Dim 3 callout 1 body"
+          },
+          {
+            "name": "dim3_callout_1_type",
+            "type": "text",
+            "label": "Dim 3 callout 1 type"
+          },
+          {
+            "name": "dim4_finding_1",
+            "type": "text",
+            "label": "Dim 4 finding 1"
+          },
+          {
+            "name": "dim4_finding_2",
+            "type": "text",
+            "label": "Dim 4 finding 2"
+          },
+          {
+            "name": "dim4_callout_1_label",
+            "type": "text",
+            "label": "Dim 4 callout 1 label"
+          },
+          {
+            "name": "dim4_callout_1_body",
+            "type": "text",
+            "label": "Dim 4 callout 1 body"
+          },
+          {
+            "name": "dim4_callout_1_type",
+            "type": "text",
+            "label": "Dim 4 callout 1 type"
+          },
+          {
+            "name": "dim5_finding_1",
+            "type": "text",
+            "label": "Dim 5 finding 1"
+          },
+          {
+            "name": "dim5_finding_2",
+            "type": "text",
+            "label": "Dim 5 finding 2"
+          },
+          {
+            "name": "dim5_metric_1_num",
+            "type": "text",
+            "label": "Dim 5 metric 1 num"
+          },
+          {
+            "name": "dim5_metric_1_label",
+            "type": "text",
+            "label": "Dim 5 metric 1 label"
+          },
+          {
+            "name": "dim5_metric_1_note",
+            "type": "text",
+            "label": "Dim 5 metric 1 note"
+          },
+          {
+            "name": "dim5_metric_2_num",
+            "type": "text",
+            "label": "Dim 5 metric 2 num"
+          },
+          {
+            "name": "dim5_metric_2_label",
+            "type": "text",
+            "label": "Dim 5 metric 2 label"
+          },
+          {
+            "name": "dim5_metric_2_note",
+            "type": "text",
+            "label": "Dim 5 metric 2 note"
+          },
+          {
+            "name": "dim5_metric_3_num",
+            "type": "text",
+            "label": "Dim 5 metric 3 num"
+          },
+          {
+            "name": "dim5_metric_3_label",
+            "type": "text",
+            "label": "Dim 5 metric 3 label"
+          },
+          {
+            "name": "dim5_metric_3_note",
+            "type": "text",
+            "label": "Dim 5 metric 3 note"
+          },
+          {
+            "name": "dim6_finding_1",
+            "type": "text",
+            "label": "Dim 6 finding 1"
+          },
+          {
+            "name": "dim6_finding_2",
+            "type": "text",
+            "label": "Dim 6 finding 2"
+          },
+          {
+            "name": "dim6_callout_1_label",
+            "type": "text",
+            "label": "Dim 6 callout 1 label"
+          },
+          {
+            "name": "dim6_callout_1_body",
+            "type": "text",
+            "label": "Dim 6 callout 1 body"
+          },
+          {
+            "name": "dim6_callout_1_type",
+            "type": "text",
+            "label": "Dim 6 callout 1 type"
+          },
+          {
+            "name": "action_1_title",
+            "type": "text",
+            "label": "Action 1 title"
+          },
+          {
+            "name": "action_1_body",
+            "type": "text",
+            "label": "Action 1 body"
+          },
+          {
+            "name": "action_2_title",
+            "type": "text",
+            "label": "Action 2 title"
+          },
+          {
+            "name": "action_2_body",
+            "type": "text",
+            "label": "Action 2 body"
+          },
+          {
+            "name": "action_3_title",
+            "type": "text",
+            "label": "Action 3 title"
+          },
+          {
+            "name": "action_3_body",
+            "type": "text",
+            "label": "Action 3 body"
+          },
+          {
+            "name": "action_4_title",
+            "type": "text",
+            "label": "Action 4 title"
+          },
+          {
+            "name": "action_4_body",
+            "type": "text",
+            "label": "Action 4 body"
+          },
+          {
+            "name": "action_5_title",
+            "type": "text",
+            "label": "Action 5 title"
+          },
+          {
+            "name": "action_5_body",
+            "type": "text",
+            "label": "Action 5 body"
+          },
+          {
+            "name": "upsell_intro",
+            "type": "text",
+            "label": "Upsell intro"
+          },
+          {
+            "name": "upsell_1_score",
+            "type": "text",
+            "label": "Upsell 1 score"
+          },
+          {
+            "name": "upsell_1_title",
+            "type": "text",
+            "label": "Upsell 1 title"
+          },
+          {
+            "name": "upsell_1_desc",
+            "type": "text",
+            "label": "Upsell 1 desc"
+          },
+          {
+            "name": "upsell_2_score",
+            "type": "text",
+            "label": "Upsell 2 score"
+          },
+          {
+            "name": "upsell_2_title",
+            "type": "text",
+            "label": "Upsell 2 title"
+          },
+          {
+            "name": "upsell_2_desc",
+            "type": "text",
+            "label": "Upsell 2 desc"
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth",
+        "tlsType": "",
+        "proxyKeychain": ""
+      },
+      "mapper": {
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "method": "post",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Basic {{base64(\"api:sk_0bf5f093d22f0a1265bea1f5e59b78d90aaab3c2\")}}"
+          }
+        ],
+        "contentType": "json",
+        "parseResponse": false,
+        "stopOnHttpError": true,
+        "timeout": "300",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\"source\": \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"UTF-8\\\">\\n<title>Praxis AI \\u2014 Operational Diagnostic Report</title>\\n<link href=\\\"https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap\\\" rel=\\\"stylesheet\\\">\\n<style>\\n:root {\\n  --teal:#4bb4a5; --teal-light:#5ac3b4; --teal-dim:#e8f5f3; --teal-deep:#1e3c3c;\\n  --charcoal:#2d2d2d; --charcoal-mid:#4a4a4a; --charcoal-light:#7a7a7a;\\n  --rule:#e0e6e5; --page:#f7fafa; --white:#ffffff;\\n  --red:#c0392b; --red-dim:#fdf0ee;\\n  --amber:#d4820a; --amber-dim:#fdf6e8;\\n  --green:#27836a; --green-dim:#e8f5f1;\\n}\\n*{margin:0;padding:0;box-sizing:border-box;}\\nbody{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);font-size:13px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact;}\\n\\n/* \\u2500\\u2500 CORE PAGE RULE \\u2500\\u2500 */\\n.page{width:794px;height:1123px;overflow:hidden;margin:0 auto;background:var(--white);box-shadow:0 4px 40px rgba(0,0,0,0.15);position:relative;page-break-after:always;break-after:page;}\\n.page:last-child{page-break-after:avoid;break-after:avoid;}\\n\\n/* COVER */\\n.cover{height:1123px;background:var(--charcoal);display:flex;flex-direction:column;position:relative;overflow:hidden;}\\n.cover-teal-bar{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}\\n.cover-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(75,180,165,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(75,180,165,0.06) 1px,transparent 1px);background-size:44px 44px;}\\n.cover-glow{position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(75,180,165,0.15) 0%,transparent 65%);}\\n.cover-header{padding:40px 52px 0;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;}\\n.cover-logo img{height:110px;width:auto;}\\n.cover-confidential{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);text-align:right;line-height:1.9;padding-top:6px;border-top:1px solid rgba(75,180,165,0.4);}\\n.cover-body{flex:1;padding:24px 52px 0;position:relative;z-index:2;display:flex;flex-direction:column;}\\n.cover-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;}\\n.cover-headline{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.1;color:#ffffff;margin-bottom:22px;max-width:560px;}\\n.cover-divider{width:44px;height:2px;background:var(--teal);margin-bottom:22px;}\\n.cover-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(75,180,165,0.25);max-width:580px;margin-bottom:28px;}\\n.cover-meta-item{padding:13px 18px;border-right:1px solid rgba(75,180,165,0.2);border-bottom:1px solid rgba(75,180,165,0.2);}\\n.cover-meta-item:nth-child(3),.cover-meta-item:nth-child(6){border-right:none;}\\n.cover-meta-item:nth-child(4),.cover-meta-item:nth-child(5),.cover-meta-item:nth-child(6){border-bottom:none;}\\n.cover-meta-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:4px;}\\n.cover-meta-value{font-size:13px;font-weight:500;color:#ffffff;}\\n.cover-chart-section{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:0;min-height:0;}\\n.cover-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}\\n.cover-chart-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);font-weight:500;}\\n.cover-chart-overall{font-family:'DM Serif Display',serif;font-size:26px;color:#ffffff;}\\n.cover-chart-overall span{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,0.55);margin-left:4px;}\\n.cover-chart-img{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}\\n.cover-chart-img img{width:100%;height:auto;display:block;max-width:690px;}\\n.cover-footer{padding:20px 52px;border-top:1px solid rgba(75,180,165,0.15);display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2;}\\n.cover-footer-text{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;}\\n\\n/* INNER PAGES */\\n.inner-page{height:1123px;display:flex;flex-direction:column;padding:0 52px 0;border-top:1px solid var(--rule);position:relative;overflow:hidden;}\\n.inner-page::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}\\n.page-header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 14px;border-bottom:1px solid var(--rule);flex-shrink:0;}\\n.page-header-logo img{height:90px;width:auto;}\\n.page-header-right{font-family:'DM Mono',monospace;font-size:9px;color:var(--charcoal-light);letter-spacing:0.1em;text-align:right;line-height:1.8;text-transform:uppercase;}\\n.page-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}\\n.report-footer{border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--page);flex-shrink:0;margin:0 -52px;padding:12px 52px;}\\n.footer-disclaimer{font-size:9px;color:var(--charcoal-light);max-width:500px;line-height:1.5;font-family:'DM Mono',monospace;}\\n.footer-page{font-family:'DM Mono',monospace;font-size:10px;color:var(--charcoal-light);flex-shrink:0;}\\n\\n.section-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;flex-shrink:0;}\\n.section-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--charcoal);margin-bottom:14px;line-height:1.2;flex-shrink:0;}\\n\\n/* EXEC SUMMARY */\\n.exec-summary{background:var(--charcoal);padding:20px 26px;margin-bottom:18px;position:relative;flex-shrink:0;}\\n.exec-summary::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);}\\n.exec-summary p{font-size:12.5px;line-height:1.75;color:#e8e8e8;}\\n\\n/* SCORECARD */\\n.scorecard{margin-bottom:18px;flex-shrink:0;}\\n.scorecard-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule);}\\n.scorecard-row:last-child{border-bottom:none;}\\n.scorecard-dim{width:185px;font-size:11.5px;font-weight:500;color:var(--charcoal);flex-shrink:0;}\\n.scorecard-bar-track{flex:1;height:5px;background:var(--teal-dim);border-radius:3px;overflow:visible;position:relative;}\\n.scorecard-bar-track::after{content:'';position:absolute;left:60%;top:-3px;width:2px;height:11px;background:rgba(212,130,10,0.75);border-radius:1px;}\\n.scorecard-bar-fill{height:100%;border-radius:3px;}\\n.scorecard-score{width:26px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;text-align:right;color:var(--charcoal);flex-shrink:0;}\\n.scorecard-tag{width:230px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.04em;flex-shrink:0;padding:3px 7px;border-radius:2px;}\\n\\n/* DISCLAIMER */\\n.disclaimer-block{background:#1a1a1a;border:2px solid var(--amber);padding:18px 22px;flex-shrink:0;}\\n.disclaimer-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}\\n.disclaimer-icon{width:24px;height:24px;background:var(--amber);color:#1a1a1a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}\\n.disclaimer-heading{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:var(--amber);}\\n.disclaimer-text{font-size:10.5px;line-height:1.65;color:#d8d8d8;}\\n.disclaimer-text strong{color:#ffffff;font-weight:600;}\\n.disclaimer-text em{color:rgba(255,255,255,0.8);font-style:italic;}\\n\\n/* DIMENSION PAGES */\\n.dim-page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid var(--charcoal);flex-shrink:0;}\\n.dim-number{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:500;}\\n.dim-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--charcoal);line-height:1.1;}\\n.dim-score-badge{display:flex;align-items:baseline;gap:6px;flex-shrink:0;}\\n.dim-score-num{font-family:'DM Serif Display',serif;font-size:48px;color:var(--teal);line-height:1;font-weight:700;}\\n.dim-score-denom{font-family:'DM Mono',monospace;font-size:13px;color:var(--charcoal-light);font-weight:500;}\\n.dim-score-status{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:3px;align-self:center;}\\n\\n.dim-findings{margin-bottom:12px;flex-shrink:0;}\\n.dim-findings p{font-size:12.5px;line-height:1.72;color:var(--charcoal-mid);margin-bottom:10px;}\\n.dim-findings p:last-child{margin-bottom:0;}\\n\\n.callout{margin:0 0 8px 0;padding:11px 14px;border-left:3px solid var(--teal);background:var(--teal-dim);flex-shrink:0;}\\n.callout:last-of-type{margin-bottom:0;}\\n.callout-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:4px;}\\n.callout-body{font-size:12px;line-height:1.6;color:var(--charcoal);}\\n.callouts-block{margin-bottom:12px;flex-shrink:0;}\\n\\n.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;flex-shrink:0;}\\n.metric-card{padding:12px 11px;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--teal);}\\n.metric-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal-deep);line-height:1;margin-bottom:3px;}\\n.metric-label{font-size:10.5px;font-weight:600;color:var(--charcoal);margin-bottom:2px;}\\n.metric-note{font-size:9.5px;color:var(--charcoal-light);line-height:1.4;}\\n\\n/* MATURITY LADDER */\\n.maturity-block{margin-bottom:8px;flex-shrink:0;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--charcoal);padding:11px 14px;}\\n.maturity-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--charcoal-light);margin-bottom:7px;}\\n.maturity-track{display:flex;gap:3px;align-items:stretch;height:26px;}\\n.maturity-seg{flex:1;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;font-weight:500;border-radius:2px;position:relative;}\\n.maturity-seg.active{outline:2px solid var(--charcoal);outline-offset:1px;}\\n.maturity-names{display:flex;gap:3px;margin-top:16px;}\\n.maturity-name{flex:2;font-size:8.5px;color:var(--charcoal-light);text-align:center;}\\n\\n/* WHAT GOOD LOOKS LIKE */\\n.wgl-block{background:var(--teal-dim);border:1px solid rgba(75,180,165,0.35);border-top:2px solid var(--teal);padding:11px 14px;flex-shrink:0;margin-bottom:8px;}\\n.wgl-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:8px;}\\n.wgl-items{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}\\n.wgl-item{display:flex;gap:7px;align-items:flex-start;}\\n.wgl-tick{width:14px;height:14px;border-radius:50%;background:#ffffff;border:1.5px solid var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}\\n.wgl-tick svg{width:8px;height:8px;}\\n.wgl-text{font-size:10.5px;line-height:1.5;color:var(--charcoal-mid);}\\n\\n/* ROI STRIP */\\n.roi-block{background:var(--charcoal);border-top:2px solid var(--amber);padding:10px 14px;flex-shrink:0;display:flex;align-items:stretch;gap:0;}\\n.roi-label-col{display:flex;flex-direction:column;justify-content:center;padding-right:14px;border-right:1px solid rgba(255,255,255,0.12);flex-shrink:0;min-width:90px;}\\n.roi-eyebrow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--amber);margin-bottom:2px;}\\n.roi-sublabel{font-size:8.5px;color:rgba(255,255,255,0.4);font-style:italic;}\\n.roi-items{display:flex;flex:1;gap:0;}\\n.roi-item{flex:1;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;justify-content:center;}\\n.roi-item:last-child{border-right:none;}\\n.roi-type{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px;}\\n.roi-value{font-family:'DM Serif Display',serif;font-size:17px;color:var(--amber);line-height:1;margin-bottom:2px;}\\n.roi-desc{font-size:9.5px;color:rgba(255,255,255,0.6);line-height:1.4;}\\n\\n/* ACTIONS */\\n.actions-section{flex-shrink:0;}\\n.action-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--rule);}\\n.action-item:last-child{border-bottom:none;}\\n.action-num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--teal);line-height:1;flex-shrink:0;width:26px;padding-top:2px;}\\n.action-title{font-size:12.5px;font-weight:600;color:var(--charcoal);margin-bottom:4px;}\\n.action-body{font-size:11.5px;line-height:1.65;color:var(--charcoal-mid);}\\n\\n/* UPSELL */\\n.upsell-section{background:var(--charcoal);padding:22px 28px;margin-top:16px;position:relative;overflow:hidden;flex-shrink:0;}\\n.upsell-section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}\\n.upsell-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(75,180,165,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(75,180,165,0.05) 1px,transparent 1px);background-size:28px 28px;}\\n.upsell-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;position:relative;}\\n.upsell-title{font-family:'DM Serif Display',serif;font-size:19px;color:#ffffff;margin-bottom:5px;position:relative;}\\n.upsell-intro{font-size:12px;color:#cccccc;margin-bottom:14px;max-width:560px;position:relative;line-height:1.6;}\\n.upsell-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;}\\n.upsell-card{background:rgba(75,180,165,0.09);border:1px solid rgba(75,180,165,0.25);padding:15px;border-top:2px solid var(--teal);}\\n.upsell-card-score{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.08em;margin-bottom:6px;}\\n.upsell-card-title{font-family:'DM Serif Display',serif;font-size:14px;color:#ffffff;margin-bottom:7px;line-height:1.25;}\\n.upsell-card-desc{font-size:11.5px;line-height:1.6;color:#c0c0c0;margin-bottom:12px;}\\n.upsell-price{display:flex;align-items:baseline;gap:4px;border-top:1px solid rgba(75,180,165,0.2);padding-top:10px;}\\n.upsell-price-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal-light);}\\n.upsell-price-label{font-size:11px;color:rgba(255,255,255,0.5);}\\n</style>\\n</head>\\n<body>\\n\\n<!-- \\u2550\\u2550 PAGE 1: COVER \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"cover\\\">\\n  <div class=\\\"cover-teal-bar\\\"></div>\\n  <div class=\\\"cover-grid\\\"></div>\\n  <div class=\\\"cover-glow\\\"></div>\\n  <div class=\\\"cover-header\\\">\\n    <div class=\\\"cover-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/XziUQERRfNIlKcWj.png\\\" alt=\\\"Praxis AI\\\"></div>\\n    <div class=\\\"cover-confidential\\\">Operational Diagnostic Report<br>Confidential \\u2014 Prepared for recipient only<br>{{4.report_date}}</div>\\n  </div>\\n  <div class=\\\"cover-body\\\">\\n    <div class=\\\"cover-eyebrow\\\">Praxis AI Operational Intelligence Report</div>\\n    <div class=\\\"cover-headline\\\">{{4.business_name}}</div>\\n    <div class=\\\"cover-divider\\\"></div>\\n    <div class=\\\"cover-meta-grid\\\">\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Business</div><div class=\\\"cover-meta-value\\\">{{4.business_name}}</div></div>\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Industry</div><div class=\\\"cover-meta-value\\\">{{4.industry}}</div></div>\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Report Date</div><div class=\\\"cover-meta-value\\\">{{4.report_date}}</div></div>\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Revenue Band</div><div class=\\\"cover-meta-value\\\">{{4.revenue_band}}</div></div>\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Staff</div><div class=\\\"cover-meta-value\\\">{{4.staff_count}}</div></div>\\n      <div class=\\\"cover-meta-item\\\"><div class=\\\"cover-meta-label\\\">Years Operating</div><div class=\\\"cover-meta-value\\\">{{4.years_operating}}</div></div>\\n    </div>\\n    <div class=\\\"cover-chart-section\\\">\\n      <div class=\\\"cover-chart-header\\\">\\n        <div class=\\\"cover-chart-title\\\">Six-Dimension Score Profile</div>\\n        <div class=\\\"cover-chart-overall\\\">{{4.overall_score}} <span>/ 10 Overall</span></div>\\n      </div>\\n      <div class=\\\"cover-chart-img\\\">\\n<div class=\\\"cover-chart-svg-wrap\\\">\\n<svg id=\\\"radar\\\" viewBox=\\\"0 0 690 340\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" style=\\\"width:690px;height:340px;display:block;\\\">\\n  <defs><style>\\n    .rg{fill:none;stroke:rgba(255,255,255,0.12);stroke-width:1;}\\n    .rb{fill:none;stroke:rgba(212,130,10,0.55);stroke-width:1.5;stroke-dasharray:4,3;}\\n    .ra{stroke:rgba(255,255,255,0.15);stroke-width:1;}\\n    .rf{fill:rgba(75,180,165,0.22);stroke:#4bb4a5;stroke-width:2;}\\n    .rd{fill:#4bb4a5;}\\n    .rl{font-family:\\\"DM Sans\\\",sans-serif;font-size:11px;fill:rgba(255,255,255,0.72);}\\n    .rs{font-family:\\\"DM Mono\\\",monospace;font-size:10px;fill:#4bb4a5;font-weight:500;}\\n    .rn{font-family:\\\"DM Mono\\\",monospace;font-size:8px;fill:rgba(255,255,255,0.28);}\\n  </style></defs>\\n  <polygon class=\\\"rg\\\" points=\\\"345.0,144.0 367.5,157.0 367.5,183.0 345.0,196.0 322.5,183.0 322.5,157.0\\\"/>\\n  <polygon class=\\\"rg\\\" points=\\\"345.0,118.0 390.0,144.0 390.0,196.0 345.0,222.0 300.0,196.0 300.0,144.0\\\"/>\\n  <polygon class=\\\"rb\\\" points=\\\"345.0,92.0 412.5,131.0 412.5,209.0 345.0,248.0 277.5,209.0 277.5,131.0\\\"/>\\n  <polygon class=\\\"rg\\\" points=\\\"345.0,66.0 435.1,118.0 435.1,222.0 345.0,274.0 254.9,222.0 254.9,118.0\\\"/>\\n  <polygon class=\\\"rg\\\" points=\\\"345.0,40.0 457.6,105.0 457.6,235.0 345.0,300.0 232.4,235.0 232.4,105.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"345.0\\\" y2=\\\"40.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"457.6\\\" y2=\\\"105.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"457.6\\\" y2=\\\"235.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"345.0\\\" y2=\\\"300.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"232.4\\\" y2=\\\"235.0\\\"/>\\n  <line class=\\\"ra\\\" x1=\\\"345\\\" y1=\\\"170\\\" x2=\\\"232.4\\\" y2=\\\"105.0\\\"/>\\n  <text class=\\\"rn\\\" x=\\\"349\\\" y=\\\"147.0\\\" style=\\\"fill:rgba(255,255,255,0.28);\\\">2</text>\\n  <text class=\\\"rn\\\" x=\\\"349\\\" y=\\\"121.0\\\" style=\\\"fill:rgba(255,255,255,0.28);\\\">4</text>\\n  <text class=\\\"rn\\\" x=\\\"349\\\" y=\\\"95.0\\\" style=\\\"fill:rgba(212,130,10,0.7);\\\">6</text>\\n  <text class=\\\"rn\\\" x=\\\"349\\\" y=\\\"69.0\\\" style=\\\"fill:rgba(255,255,255,0.28);\\\">8</text>\\n  <text class=\\\"rn\\\" x=\\\"349\\\" y=\\\"43.0\\\" style=\\\"fill:rgba(255,255,255,0.28);\\\">10</text>\\n  <polygon id=\\\"score-poly\\\" class=\\\"rf\\\" points=\\\"\\\"/>\\n  <circle id=\\\"dot0\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <circle id=\\\"dot1\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <circle id=\\\"dot2\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <circle id=\\\"dot3\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <circle id=\\\"dot4\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <circle id=\\\"dot5\\\" class=\\\"rd\\\" r=\\\"4\\\" cx=\\\"0\\\" cy=\\\"0\\\"/>\\n  <text id=\\\"slabel0\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text id=\\\"slabel1\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text id=\\\"slabel2\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text id=\\\"slabel3\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text id=\\\"slabel4\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text id=\\\"slabel5\\\" class=\\\"rs\\\" x=\\\"0\\\" y=\\\"0\\\"></text>\\n  <text class=\\\"rl\\\" x=\\\"345.0\\\" y=\\\"18.0\\\" text-anchor=\\\"middle\\\"><tspan x=\\\"345.0\\\" dy=\\\"0\\\">Process &amp;</tspan><tspan x=\\\"345.0\\\" dy=\\\"13\\\">Workflow</tspan></text>\\n  <text class=\\\"rl\\\" x=\\\"476.6\\\" y=\\\"94.0\\\" text-anchor=\\\"start\\\"><tspan x=\\\"476.6\\\" dy=\\\"0\\\">People &amp;</tspan><tspan x=\\\"476.6\\\" dy=\\\"13\\\">Training</tspan></text>\\n  <text class=\\\"rl\\\" x=\\\"476.6\\\" y=\\\"246.0\\\" text-anchor=\\\"start\\\">Technology</text>\\n  <text class=\\\"rl\\\" x=\\\"345.0\\\" y=\\\"322.0\\\" text-anchor=\\\"middle\\\">Strategy</text>\\n  <text class=\\\"rl\\\" x=\\\"213.4\\\" y=\\\"246.0\\\" text-anchor=\\\"end\\\"><tspan x=\\\"213.4\\\" dy=\\\"0\\\">Data &amp;</tspan><tspan x=\\\"213.4\\\" dy=\\\"13\\\">Decisions</tspan></text>\\n  <text class=\\\"rl\\\" x=\\\"213.4\\\" y=\\\"94.0\\\" text-anchor=\\\"end\\\">Scalability</text>\\n</svg>\\n<script>\\n(function(){\\n  var cx=345,cy=170,maxR=130;\\n  var scores=[\\n    parseFloat(\\\"{{4.dim1_score}}\\\")||0,\\n    parseFloat(\\\"{{4.dim2_score}}\\\")||0,\\n    parseFloat(\\\"{{4.dim3_score}}\\\")||0,\\n    parseFloat(\\\"{{4.dim4_score}}\\\")||0,\\n    parseFloat(\\\"{{4.dim5_score}}\\\")||0,\\n    parseFloat(\\\"{{4.dim6_score}}\\\")||0\\n  ];\\n  var pts=[];\\n  for(var i=0;i<6;i++){\\n    var a=Math.PI*(-0.5+i*2/6);\\n    var r=(scores[i]/10)*maxR;\\n    var x=cx+r*Math.cos(a);\\n    var y=cy+r*Math.sin(a);\\n    pts.push(x.toFixed(1)+\\\",\\\"+y.toFixed(1));\\n    var d=document.getElementById(\\\"dot\\\"+i);\\n    d.setAttribute(\\\"cx\\\",x.toFixed(1));\\n    d.setAttribute(\\\"cy\\\",y.toFixed(1));\\n    var lr=r+16;\\n    var sl=document.getElementById(\\\"slabel\\\"+i);\\n    sl.setAttribute(\\\"x\\\",(cx+lr*Math.cos(a)).toFixed(1));\\n    sl.setAttribute(\\\"y\\\",(cy+lr*Math.sin(a)+4).toFixed(1));\\n    sl.setAttribute(\\\"text-anchor\\\",\\\"middle\\\");\\n    sl.textContent=scores[i];\\n  }\\n  document.getElementById(\\\"score-poly\\\").setAttribute(\\\"points\\\",pts.join(\\\" \\\"));\\n})();\\n</script>\\n</div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"cover-footer\\\">\\n    <div class=\\\"cover-footer-text\\\">Praxis AI \\u2014 Operational Intelligence for Australian SMEs</div>\\n    <div class=\\\"cover-footer-text\\\">&copy; 2026 Praxis AI \\u2014 All Rights Reserved</div>\\n  </div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 2: EXEC SUMMARY + SCORECARD + DISCLAIMER \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\">\\n    <div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div>\\n    <div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>\\n  </div>\\n  <div class=\\\"page-content\\\">\\n    <div class=\\\"section-eyebrow\\\" style=\\\"margin-top:14px;\\\">Overview</div>\\n    <div class=\\\"section-title\\\">Executive Summary</div>\\n    <div class=\\\"exec-summary\\\"><p>{{4.executive_summary}}</p></div>\\n    <div class=\\\"section-eyebrow\\\" style=\\\"margin-top:14px;\\\">Results</div>\\n    <div class=\\\"section-title\\\">Six-Dimension Scorecard</div>\\n    <div class=\\\"scorecard\\\">\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">Process &amp; Workflow</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim1_score}}0%;background:{{4.dim1_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim1_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim1_tag_bg}};color:{{4.dim1_tag_colour}}\\\">{{4.dim1_status}}</div></div>\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">People &amp; Training</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim2_score}}0%;background:{{4.dim2_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim2_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim2_tag_bg}};color:{{4.dim2_tag_colour}}\\\">{{4.dim2_status}}</div></div>\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">Technology &amp; Automation</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim3_score}}0%;background:{{4.dim3_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim3_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim3_tag_bg}};color:{{4.dim3_tag_colour}}\\\">{{4.dim3_status}}</div></div>\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">Strategy to Execution</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim4_score}}0%;background:{{4.dim4_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim4_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim4_tag_bg}};color:{{4.dim4_tag_colour}}\\\">{{4.dim4_status}}</div></div>\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">Data &amp; Decision Making</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim5_score}}0%;background:{{4.dim5_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim5_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim5_tag_bg}};color:{{4.dim5_tag_colour}}\\\">{{4.dim5_status}}</div></div>\\n      <div class=\\\"scorecard-row\\\"><div class=\\\"scorecard-dim\\\">Scalability</div><div class=\\\"scorecard-bar-track\\\"><div class=\\\"scorecard-bar-fill\\\" style=\\\"width:{{4.dim6_score}}0%;background:{{4.dim6_bar_colour}}\\\"></div></div><div class=\\\"scorecard-score\\\">{{4.dim6_score}}</div><div class=\\\"scorecard-tag\\\" style=\\\"background:{{4.dim6_tag_bg}};color:{{4.dim6_tag_colour}}\\\">{{4.dim6_status}}</div></div>\\n    </div>\\n    <div class=\\\"disclaimer-block\\\">\\n      <div class=\\\"disclaimer-icon-row\\\"><div class=\\\"disclaimer-icon\\\">!</div><div class=\\\"disclaimer-heading\\\">Legal Disclaimer &amp; Limitations of This Report</div></div>\\n      <div class=\\\"disclaimer-text\\\">\\n        <strong>This report does not constitute financial, legal, accounting, tax, or any form of professional advice.</strong> It is an automated diagnostic output generated solely from self-reported responses and has not been independently verified. No warranty, express or implied, is given as to accuracy, completeness, or fitness for any purpose.<br><br>\\n        All financial figures, estimates, and ranges are derived exclusively from data declared by the respondent. <strong>No figure in this report should be relied upon for financial planning, investment decisions, or any commercial transaction without independent verification by a qualified professional.</strong><br><br>\\n        <strong>ROI calculations are based on the client's revenue band, staff count, and industry. These figures are approximate.</strong> Actual outcomes will vary based on implementation quality, market conditions, and individual business circumstances. These figures must not be used as the basis for any financial commitment, investment, or business decision without independent professional review.<br><br>\\n        Praxis AI expressly excludes all liability to the fullest extent permitted under the <em>Australian Consumer Law</em> for any loss arising from use of or reliance upon this report. Receipt constitutes acknowledgement of these terms. <strong>Engage a licensed accountant, solicitor, or registered business advisor for formal advice.</strong>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 2 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 3: DIMENSION 01 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 01</div><div class=\\\"dim-title\\\">Process &amp; Workflow</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim1_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim1_tag_bg}};color:{{4.dim1_tag_colour}}\\\">{{4.dim1_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim1_finding_1}}</p>\\n      <p>{{4.dim1_finding_2}}</p>\\n      <p>{{4.dim1_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim1_callout_1_border}};background:{{4.dim1_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim1_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim1_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim1_callout_2_border}};background:{{4.dim1_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim1_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim1_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim1_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim1_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim1_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim1_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim1_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim1_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim1_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim1_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim1_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim1_mat_1_active}}\\\" style=\\\"background:{{4.dim1_mat_1_bg}};color:{{4.dim1_mat_1_text}};flex:2;\\\">{{4.dim1_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim1_mat_2_active}}\\\" style=\\\"background:{{4.dim1_mat_2_bg}};color:{{4.dim1_mat_2_text}};flex:2;\\\">{{4.dim1_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim1_mat_3_active}}\\\" style=\\\"background:{{4.dim1_mat_3_bg}};color:{{4.dim1_mat_3_text}};flex:2;\\\">{{4.dim1_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim1_mat_4_active}}\\\" style=\\\"background:{{4.dim1_mat_4_bg}};color:{{4.dim1_mat_4_text}};flex:2;\\\">{{4.dim1_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim1_mat_5_active}}\\\" style=\\\"background:{{4.dim1_mat_5_bg}};color:{{4.dim1_mat_5_text}};flex:2;\\\">{{4.dim1_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\">\\n        <div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div>\\n        <div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div>\\n        <div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div>\\n        <div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div>\\n        <div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div>\\n      </div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim1_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim1_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim1_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim1_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim1_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim1_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim1_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim1_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim1_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim1_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim1_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim1_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 3 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 4: DIMENSION 02 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 02</div><div class=\\\"dim-title\\\">People &amp; Training</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim2_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim2_tag_bg}};color:{{4.dim2_tag_colour}}\\\">{{4.dim2_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim2_finding_1}}</p>\\n      <p>{{4.dim2_finding_2}}</p>\\n      <p>{{4.dim2_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim2_callout_1_border}};background:{{4.dim2_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim2_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim2_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim2_callout_2_border}};background:{{4.dim2_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim2_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim2_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim2_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim2_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim2_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim2_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim2_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim2_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim2_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim2_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim2_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim2_mat_1_active}}\\\" style=\\\"background:{{4.dim2_mat_1_bg}};color:{{4.dim2_mat_1_text}};flex:2;\\\">{{4.dim2_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim2_mat_2_active}}\\\" style=\\\"background:{{4.dim2_mat_2_bg}};color:{{4.dim2_mat_2_text}};flex:2;\\\">{{4.dim2_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim2_mat_3_active}}\\\" style=\\\"background:{{4.dim2_mat_3_bg}};color:{{4.dim2_mat_3_text}};flex:2;\\\">{{4.dim2_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim2_mat_4_active}}\\\" style=\\\"background:{{4.dim2_mat_4_bg}};color:{{4.dim2_mat_4_text}};flex:2;\\\">{{4.dim2_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim2_mat_5_active}}\\\" style=\\\"background:{{4.dim2_mat_5_bg}};color:{{4.dim2_mat_5_text}};flex:2;\\\">{{4.dim2_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\"><div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div><div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div><div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div><div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div><div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div></div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim2_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim2_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim2_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim2_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim2_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim2_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim2_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim2_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim2_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim2_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim2_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim2_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 4 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 5: DIMENSION 03 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 03</div><div class=\\\"dim-title\\\">Technology &amp; Automation</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim3_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim3_tag_bg}};color:{{4.dim3_tag_colour}}\\\">{{4.dim3_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim3_finding_1}}</p>\\n      <p>{{4.dim3_finding_2}}</p>\\n      <p>{{4.dim3_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim3_callout_1_border}};background:{{4.dim3_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim3_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim3_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim3_callout_2_border}};background:{{4.dim3_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim3_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim3_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim3_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim3_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim3_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim3_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim3_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim3_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim3_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim3_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim3_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim3_mat_1_active}}\\\" style=\\\"background:{{4.dim3_mat_1_bg}};color:{{4.dim3_mat_1_text}};flex:2;\\\">{{4.dim3_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim3_mat_2_active}}\\\" style=\\\"background:{{4.dim3_mat_2_bg}};color:{{4.dim3_mat_2_text}};flex:2;\\\">{{4.dim3_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim3_mat_3_active}}\\\" style=\\\"background:{{4.dim3_mat_3_bg}};color:{{4.dim3_mat_3_text}};flex:2;\\\">{{4.dim3_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim3_mat_4_active}}\\\" style=\\\"background:{{4.dim3_mat_4_bg}};color:{{4.dim3_mat_4_text}};flex:2;\\\">{{4.dim3_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim3_mat_5_active}}\\\" style=\\\"background:{{4.dim3_mat_5_bg}};color:{{4.dim3_mat_5_text}};flex:2;\\\">{{4.dim3_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\"><div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div><div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div><div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div><div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div><div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div></div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim3_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim3_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim3_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim3_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim3_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim3_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim3_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim3_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim3_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim3_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim3_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim3_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 5 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 6: DIMENSION 04 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 04</div><div class=\\\"dim-title\\\">Strategy to Execution</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim4_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim4_tag_bg}};color:{{4.dim4_tag_colour}}\\\">{{4.dim4_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim4_finding_1}}</p>\\n      <p>{{4.dim4_finding_2}}</p>\\n      <p>{{4.dim4_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim4_callout_1_border}};background:{{4.dim4_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim4_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim4_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim4_callout_2_border}};background:{{4.dim4_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim4_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim4_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim4_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim4_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim4_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim4_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim4_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim4_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim4_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim4_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim4_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim4_mat_1_active}}\\\" style=\\\"background:{{4.dim4_mat_1_bg}};color:{{4.dim4_mat_1_text}};flex:2;\\\">{{4.dim4_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim4_mat_2_active}}\\\" style=\\\"background:{{4.dim4_mat_2_bg}};color:{{4.dim4_mat_2_text}};flex:2;\\\">{{4.dim4_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim4_mat_3_active}}\\\" style=\\\"background:{{4.dim4_mat_3_bg}};color:{{4.dim4_mat_3_text}};flex:2;\\\">{{4.dim4_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim4_mat_4_active}}\\\" style=\\\"background:{{4.dim4_mat_4_bg}};color:{{4.dim4_mat_4_text}};flex:2;\\\">{{4.dim4_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim4_mat_5_active}}\\\" style=\\\"background:{{4.dim4_mat_5_bg}};color:{{4.dim4_mat_5_text}};flex:2;\\\">{{4.dim4_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\"><div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div><div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div><div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div><div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div><div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div></div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim4_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim4_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim4_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim4_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim4_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim4_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim4_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim4_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim4_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim4_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim4_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim4_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 6 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 7: DIMENSION 05 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 05</div><div class=\\\"dim-title\\\">Data &amp; Decision Making</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim5_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim5_tag_bg}};color:{{4.dim5_tag_colour}}\\\">{{4.dim5_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim5_finding_1}}</p>\\n      <p>{{4.dim5_finding_2}}</p>\\n      <p>{{4.dim5_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim5_callout_1_border}};background:{{4.dim5_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim5_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim5_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim5_callout_2_border}};background:{{4.dim5_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim5_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim5_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim5_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim5_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim5_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim5_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim5_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim5_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim5_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim5_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim5_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim5_mat_1_active}}\\\" style=\\\"background:{{4.dim5_mat_1_bg}};color:{{4.dim5_mat_1_text}};flex:2;\\\">{{4.dim5_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim5_mat_2_active}}\\\" style=\\\"background:{{4.dim5_mat_2_bg}};color:{{4.dim5_mat_2_text}};flex:2;\\\">{{4.dim5_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim5_mat_3_active}}\\\" style=\\\"background:{{4.dim5_mat_3_bg}};color:{{4.dim5_mat_3_text}};flex:2;\\\">{{4.dim5_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim5_mat_4_active}}\\\" style=\\\"background:{{4.dim5_mat_4_bg}};color:{{4.dim5_mat_4_text}};flex:2;\\\">{{4.dim5_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim5_mat_5_active}}\\\" style=\\\"background:{{4.dim5_mat_5_bg}};color:{{4.dim5_mat_5_text}};flex:2;\\\">{{4.dim5_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\"><div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div><div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div><div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div><div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div><div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div></div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim5_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim5_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim5_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim5_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim5_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim5_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim5_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim5_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim5_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim5_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim5_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim5_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 7 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 8: DIMENSION 06 \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div style=\\\"margin-top:12px;\\\" class=\\\"dim-page-header\\\">\\n      <div class=\\\"dim-page-left\\\"><div class=\\\"dim-number\\\">Dimension 06</div><div class=\\\"dim-title\\\">Scalability</div></div>\\n      <div class=\\\"dim-score-badge\\\"><div class=\\\"dim-score-num\\\">{{4.dim6_score}}</div><div><div class=\\\"dim-score-denom\\\">/ 10</div><div class=\\\"dim-score-status\\\" style=\\\"background:{{4.dim6_tag_bg}};color:{{4.dim6_tag_colour}}\\\">{{4.dim6_status}}</div></div></div>\\n    </div>\\n    <div class=\\\"dim-findings\\\">\\n      <p>{{4.dim6_finding_1}}</p>\\n      <p>{{4.dim6_finding_2}}</p>\\n      <p>{{4.dim6_finding_3}}</p>\\n    </div>\\n    <div class=\\\"callouts-block\\\">\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim6_callout_1_border}};background:{{4.dim6_callout_1_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim6_callout_1_label}}</div><div class=\\\"callout-body\\\">{{4.dim6_callout_1_body}}</div></div>\\n      <div class=\\\"callout\\\" style=\\\"border-left-color:{{4.dim6_callout_2_border}};background:{{4.dim6_callout_2_bg}}\\\"><div class=\\\"callout-label\\\">{{4.dim6_callout_2_label}}</div><div class=\\\"callout-body\\\">{{4.dim6_callout_2_body}}</div></div>\\n    </div>\\n    <div class=\\\"metric-row\\\">\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim6_metric_1_num}}</div><div class=\\\"metric-label\\\">{{4.dim6_metric_1_label}}</div><div class=\\\"metric-note\\\">{{4.dim6_metric_1_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim6_metric_2_num}}</div><div class=\\\"metric-label\\\">{{4.dim6_metric_2_label}}</div><div class=\\\"metric-note\\\">{{4.dim6_metric_2_note}}</div></div>\\n      <div class=\\\"metric-card\\\"><div class=\\\"metric-num\\\">{{4.dim6_metric_3_num}}</div><div class=\\\"metric-label\\\">{{4.dim6_metric_3_label}}</div><div class=\\\"metric-note\\\">{{4.dim6_metric_3_note}}</div></div>\\n    </div>\\n    <div class=\\\"maturity-block\\\">\\n      <div class=\\\"maturity-label\\\">Maturity Level</div>\\n      <div class=\\\"maturity-track\\\">\\n        <div class=\\\"maturity-seg {{4.dim6_mat_1_active}}\\\" style=\\\"background:{{4.dim6_mat_1_bg}};color:{{4.dim6_mat_1_text}};flex:2;\\\">{{4.dim6_mat_1_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim6_mat_2_active}}\\\" style=\\\"background:{{4.dim6_mat_2_bg}};color:{{4.dim6_mat_2_text}};flex:2;\\\">{{4.dim6_mat_2_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim6_mat_3_active}}\\\" style=\\\"background:{{4.dim6_mat_3_bg}};color:{{4.dim6_mat_3_text}};flex:2;\\\">{{4.dim6_mat_3_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim6_mat_4_active}}\\\" style=\\\"background:{{4.dim6_mat_4_bg}};color:{{4.dim6_mat_4_text}};flex:2;\\\">{{4.dim6_mat_4_val}}</div>\\n        <div class=\\\"maturity-seg {{4.dim6_mat_5_active}}\\\" style=\\\"background:{{4.dim6_mat_5_bg}};color:{{4.dim6_mat_5_text}};flex:2;\\\">{{4.dim6_mat_5_val}}</div>\\n      </div>\\n      <div class=\\\"maturity-names\\\"><div class=\\\"maturity-name\\\">Reactive<br>1\\u20132</div><div class=\\\"maturity-name\\\">Developing<br>3\\u20134</div><div class=\\\"maturity-name\\\">Functional<br>5\\u20136</div><div class=\\\"maturity-name\\\">Optimised<br>7\\u20138</div><div class=\\\"maturity-name\\\">Leading<br>9\\u201310</div></div>\\n    </div>\\n    <div class=\\\"wgl-block\\\">\\n      <div class=\\\"wgl-label\\\">What Good Looks Like \\u2014 Score 8+</div>\\n      <div class=\\\"wgl-items\\\">\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim6_wgl_1}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim6_wgl_2}}</div></div>\\n        <div class=\\\"wgl-item\\\"><div class=\\\"wgl-tick\\\"><svg viewBox=\\\"0 0 10 10\\\" fill=\\\"none\\\"><polyline points=\\\"2,5 4,7.5 8,2.5\\\" stroke=\\\"#4bb4a5\\\" stroke-width=\\\"1.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/></svg></div><div class=\\\"wgl-text\\\">{{4.dim6_wgl_3}}</div></div>\\n      </div>\\n    </div>\\n    <div class=\\\"roi-block\\\">\\n      <div class=\\\"roi-label-col\\\"><div class=\\\"roi-eyebrow\\\">ROI Estimate</div><div class=\\\"roi-sublabel\\\">Indicative only</div></div>\\n      <div class=\\\"roi-items\\\">\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim6_roi_1_type}}</div><div class=\\\"roi-value\\\">{{4.dim6_roi_1_value}}</div><div class=\\\"roi-desc\\\">{{4.dim6_roi_1_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim6_roi_2_type}}</div><div class=\\\"roi-value\\\">{{4.dim6_roi_2_value}}</div><div class=\\\"roi-desc\\\">{{4.dim6_roi_2_desc}}</div></div>\\n        <div class=\\\"roi-item\\\"><div class=\\\"roi-type\\\">{{4.dim6_roi_3_type}}</div><div class=\\\"roi-value\\\">{{4.dim6_roi_3_value}}</div><div class=\\\"roi-desc\\\">{{4.dim6_roi_3_desc}}</div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 8 of 9</div></div>\\n</div>\\n</div>\\n\\n<!-- \\u2550\\u2550 PAGE 9: ACTIONS + UPSELL \\u2550\\u2550 -->\\n<div class=\\\"page\\\">\\n<div class=\\\"inner-page\\\">\\n  <div class=\\\"page-header\\\"><div class=\\\"page-header-logo\\\"><img src=\\\"https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png\\\" alt=\\\"Praxis AI\\\"></div><div class=\\\"page-header-right\\\">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>\\n  <div class=\\\"page-content\\\">\\n    <div class=\\\"section-eyebrow\\\" style=\\\"margin-top:14px;\\\">What To Do Next</div>\\n    <div class=\\\"section-title\\\">Priority Actions</div>\\n    <div class=\\\"actions-section\\\">\\n      <div class=\\\"action-item\\\"><div class=\\\"action-num\\\">1</div><div><div class=\\\"action-title\\\">{{4.action_1_title}}</div><div class=\\\"action-body\\\">{{4.action_1_body}}</div></div></div>\\n      <div class=\\\"action-item\\\"><div class=\\\"action-num\\\">2</div><div><div class=\\\"action-title\\\">{{4.action_2_title}}</div><div class=\\\"action-body\\\">{{4.action_2_body}}</div></div></div>\\n      <div class=\\\"action-item\\\"><div class=\\\"action-num\\\">3</div><div><div class=\\\"action-title\\\">{{4.action_3_title}}</div><div class=\\\"action-body\\\">{{4.action_3_body}}</div></div></div>\\n      <div class=\\\"action-item\\\"><div class=\\\"action-num\\\">4</div><div><div class=\\\"action-title\\\">{{4.action_4_title}}</div><div class=\\\"action-body\\\">{{4.action_4_body}}</div></div></div>\\n      <div class=\\\"action-item\\\"><div class=\\\"action-num\\\">5</div><div><div class=\\\"action-title\\\">{{4.action_5_title}}</div><div class=\\\"action-body\\\">{{4.action_5_body}}</div></div></div>\\n    </div>\\n    <div class=\\\"upsell-section\\\">\\n      <div class=\\\"upsell-bg\\\"></div>\\n      <div class=\\\"upsell-eyebrow\\\">Recommended Next Steps</div>\\n      <div class=\\\"upsell-title\\\">Your Two Highest-Impact Toolkits</div>\\n      <div class=\\\"upsell-intro\\\">{{4.upsell_intro}}</div>\\n      <div class=\\\"upsell-cards\\\">\\n        <div class=\\\"upsell-card\\\"><div class=\\\"upsell-card-score\\\">SCORE: {{4.upsell_1_score}} \\u2014 IMMEDIATE ATTENTION REQUIRED</div><div class=\\\"upsell-card-title\\\">{{4.upsell_1_title}}</div><div class=\\\"upsell-card-desc\\\">{{4.upsell_1_desc}}</div><div class=\\\"upsell-price\\\"><div class=\\\"upsell-price-num\\\">$97</div><div class=\\\"upsell-price-label\\\">&nbsp;one-time</div></div></div>\\n        <div class=\\\"upsell-card\\\"><div class=\\\"upsell-card-score\\\">SCORE: {{4.upsell_2_score}} \\u2014 IMMEDIATE ATTENTION REQUIRED</div><div class=\\\"upsell-card-title\\\">{{4.upsell_2_title}}</div><div class=\\\"upsell-card-desc\\\">{{4.upsell_2_desc}}</div><div class=\\\"upsell-price\\\"><div class=\\\"upsell-price-num\\\">$97</div><div class=\\\"upsell-price-label\\\">&nbsp;one-time</div></div></div>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"report-footer\\\"><div class=\\\"footer-disclaimer\\\">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class=\\\"footer-page\\\">Page 9 of 9</div></div>\\n</div>\\n</div>\\n\\n</body>\\n</html>\\n\", \"landscape\": false, \"format\": \"A4\", \"margin\": \"0\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1919,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "authenticationType": {
+              "label": "No authenticationUse when no credentials are required for the request."
+            },
+            "tlsType": {
+              "label": "Empty"
+            },
+            "proxyKeychain": {
+              "label": "Choose a key"
+            }
+          },
+          "expect": {
+            "method": {
+              "mode": "chose",
+              "label": "POST"
+            },
+            "headers": {
+              "mode": "chose",
+              "items": [
+                null
+              ]
+            },
+            "queryParameters": {
+              "mode": "chose"
+            },
+            "contentType": {
+              "label": "application/jsonEnter data in the JSON format, as a string or using a data structure."
+            },
+            "parseResponse": {
+              "mode": "chose"
+            },
+            "stopOnHttpError": {
+              "mode": "chose"
+            },
+            "allowRedirects": {
+              "mode": "chose"
+            },
+            "shareCookies": {
+              "mode": "chose"
+            },
+            "requestCompressedContent": {
+              "mode": "chose"
+            },
+            "inputMethod": {
+              "label": "JSON stringEnter the JSON body as a raw text string. If values contain JSON reserved characters, you must escape them manually."
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authenticationType",
+            "type": "select",
+            "label": "Authentication type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "noAuth",
+                "apiKey",
+                "basicAuth",
+                "oAuth"
+              ]
+            }
+          },
+          {
+            "name": "tlsType",
+            "type": "select",
+            "label": "Transport layer security (TLS)",
+            "validate": {
+              "enum": [
+                "mTls",
+                "tls"
+              ]
+            }
+          },
+          {
+            "name": "proxyKeychain",
+            "type": "keychain:proxy",
+            "label": "Proxy"
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "get",
+                "head",
+                "post",
+                "put",
+                "patch",
+                "delete",
+                "options"
+              ]
+            }
+          },
+          {
+            "name": "headers",
+            "type": "array",
+            "label": "Headers",
+            "spec": {
+              "name": "value",
+              "label": "Header",
+              "type": "collection",
+              "spec": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "required": true,
+                  "validate": {
+                    "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+                  }
+                },
+                {
+                  "name": "value",
+                  "label": "Value",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          {
+            "name": "queryParameters",
+            "type": "array",
+            "label": "Query parameters",
+            "spec": {
+              "name": "value",
+              "label": "Parameter",
+              "type": "collection",
+              "spec": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "value",
+                  "label": "Value",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          {
+            "name": "contentType",
+            "type": "select",
+            "label": "Body content type",
+            "validate": {
+              "enum": [
+                "json",
+                "multipart",
+                "urlEncoded",
+                "custom"
+              ]
+            }
+          },
+          {
+            "name": "parseResponse",
+            "type": "boolean",
+            "label": "Parse response",
+            "required": true
+          },
+          {
+            "name": "stopOnHttpError",
+            "type": "boolean",
+            "label": "Return error if HTTP request fails",
+            "required": true
+          },
+          {
+            "name": "timeout",
+            "type": "uinteger",
+            "label": "Timeout",
+            "validate": {
+              "min": 1,
+              "max": 300
+            }
+          },
+          {
+            "name": "allowRedirects",
+            "type": "boolean",
+            "label": "Allow redirects",
+            "required": true
+          },
+          {
+            "name": "shareCookies",
+            "type": "boolean",
+            "label": "Share cookies with other HTTP modules",
+            "required": true
+          },
+          {
+            "name": "requestCompressedContent",
+            "type": "boolean",
+            "label": "Request compressed content",
+            "required": true
+          },
+          {
+            "name": "inputMethod",
+            "type": "select",
+            "label": "Body input method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "dataStructure",
+                "jsonString"
+              ]
+            }
+          },
+          {
+            "name": "jsonStringBodyContent",
+            "type": "text",
+            "label": "Body content",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "data",
+            "label": "Data",
+            "type": "any"
+          },
+          {
+            "name": "statusCode",
+            "label": "Status Code",
+            "type": "number"
+          },
+          {
+            "name": "headers",
+            "label": "Headers",
+            "type": "collection",
+            "spec": [
+              {
+                "name": "content-length",
+                "label": "Content-Length",
+                "type": "text"
+              },
+              {
+                "name": "content-encoding",
+                "label": "Content-Encoding",
+                "type": "text"
+              },
+              {
+                "name": "content-type",
+                "label": "Content-Type",
+                "type": "text"
+              },
+              {
+                "name": "server",
+                "label": "Server",
+                "type": "text"
+              },
+              {
+                "name": "cache-control",
+                "label": "Cache-Control",
+                "type": "text"
+              },
+              {
+                "name": "set-cookie",
+                "label": "Set-Cookie",
+                "type": "array",
+                "spec": {
+                  "type": "text"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "module": "google-email:sendAnEmail",
+      "version": 4,
+      "parameters": {
+        "__IMTCONN__": 7655696
+      },
+      "mapper": {
+        "to": [
+          "josh@praxisai.com.au"
+        ],
+        "subject": "Your Praxis AI Operational Diagnostic Report",
+        "bodyType": "rawHtml",
+        "attachments": [
+          {
+            "filename": "Praxis-AI-Diagnostic-Report.pdf",
+            "data": "{{10.data}}"
+          }
+        ],
+        "content": "<p>Your Praxis AI Operational Diagnostic Report is attached.</p>\n<p>If you have questions about your results, reply to this email.</p>\n<p>\u2014 The Praxis AI Team</p>"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2700,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "My Gmail connection (joshchakoush@gmail.com)",
+              "data": {
+                "scoped": "true",
+                "connection": "google-email"
+              }
+            }
+          },
+          "expect": {
+            "to": {
+              "mode": "chose",
+              "items": [
+                null
+              ]
+            },
+            "bodyType": {
+              "label": "Raw HTML"
+            },
+            "attachments": {
+              "mode": "chose",
+              "items": [
+                null
+              ]
+            },
+            "from": {
+              "mode": "chose"
+            },
+            "cc": {
+              "mode": "chose"
+            },
+            "bcc": {
+              "mode": "chose"
+            },
+            "emailHeaders": {
+              "mode": "chose"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:google-email",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "to",
+            "type": "array",
+            "label": "To",
+            "required": true,
+            "spec": {
+              "type": "email",
+              "label": "Recipient email address",
+              "required": true,
+              "validate": true,
+              "name": "value"
+            }
+          },
+          {
+            "name": "subject",
+            "type": "text",
+            "label": "Subject"
+          },
+          {
+            "name": "bodyType",
+            "type": "select",
+            "label": "Body type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "rawHtml",
+                "collection"
+              ]
+            }
+          },
+          {
+            "name": "attachments",
+            "type": "array",
+            "label": "Attachments",
+            "spec": {
+              "spec": [
+                {
+                  "name": "filename",
+                  "type": "filename",
+                  "label": "File name",
+                  "required": true,
+                  "semantic": "file:name"
+                },
+                {
+                  "name": "data",
+                  "type": "buffer",
+                  "label": "Data",
+                  "required": true,
+                  "semantic": "file:data"
+                }
+              ],
+              "type": "collection",
+              "label": "Attachment",
+              "name": "value"
+            }
+          },
+          {
+            "name": "from",
+            "type": "select",
+            "label": "From"
+          },
+          {
+            "name": "cc",
+            "type": "array",
+            "label": "CC recipients",
+            "spec": {
+              "type": "email",
+              "label": "Recipient email address",
+              "required": true,
+              "name": "value"
+            }
+          },
+          {
+            "name": "bcc",
+            "type": "array",
+            "label": "BCC recipients",
+            "spec": {
+              "type": "email",
+              "label": "Recipient email address",
+              "required": true,
+              "name": "value"
+            }
+          },
+          {
+            "name": "emailHeaders",
+            "type": "array",
+            "label": "Additional email headers",
+            "spec": {
+              "spec": [
+                {
+                  "name": "key",
+                  "type": "text",
+                  "label": "Key",
+                  "required": true
+                },
+                {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Value"
+                }
+              ],
+              "type": "collection",
+              "label": "Email header",
+              "name": "value"
+            }
+          },
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Content"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us2.make.com",
+    "notes": []
+  }
+}
