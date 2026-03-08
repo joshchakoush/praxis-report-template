@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolkit 4 - 90-Day Execution Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a1a2e;
+            --teal: #4bb4a5;
+            --teal-light: #e8f7f5;
+            --red: #c0392b;
+            --red-light: #fdf2f2;
+            --amber: #d4820a;
+            --amber-light: #fdf3e3;
+            --green: #27836a;
+            --green-light: #e8f5f1;
+            --body: #2d2d2d;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f9fafb;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--body);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'DM Serif Display', serif;
+            color: var(--navy);
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; }
+            @page { margin: 0; size: A4; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+
+        /* Cover Page Styles */
+        .cover-page {
+            background-color: var(--navy);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 0;
+            position: relative;
+        }
+
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            opacity: 0.2;
+        }
+
+        .cover-top-bar {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--teal), var(--teal-light));
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .cover-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50mm 20mm;
+            z-index: 1;
+        }
+
+        .cover-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 48pt;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .cover-subtitle {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18pt;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cover-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 30px;
+            width: 70%;
+            max-width: 400px;
+            margin-top: 50px;
+            text-align: left;
+            font-size: 10pt;
+            z-index: 1;
+        }
+
+        .cover-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cover-meta-label {
+            font-family: 'DM Mono', monospace;
+            color: var(--teal);
+            text-transform: uppercase;
+            font-size: 8pt;
+            margin-bottom: 3px;
+        }
+
+        .cover-meta-value {
+            font-family: 'DM Sans', sans-serif;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cover-footer {
+            width: 100%;
+            padding: 20px;
+            font-size: 9pt;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 1;
+        }
+
+        /* Inner Page Styles */
+        .inner-page {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .page-header {
+            background-color: var(--navy);
+            color: white;
+            padding: 11px 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10pt;
+        }
+
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 12pt;
+        }
+
+        .doc-meta {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 28px 44px;
+            color: var(--body);
+        }
+
+        .page-footer {
+            padding: 10px 44px;
+            font-size: 8pt;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .disclaimer {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .page-number {
+            font-family: 'DM Mono', monospace;
+        }
+
+        h1.section-title {
+            font-size: 24pt;
+            color: var(--navy);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--teal);
+            padding-bottom: 5px;
+        }
+
+        h2.subsection-title {
+            font-size: 18pt;
+            color: var(--navy);
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .metric-card-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--teal);
+            padding: 15px;
+            border-radius: 5px;
+            width: 30%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .metric-card-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 9pt;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .metric-card-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20pt;
+            color: var(--navy);
+            font-weight: bold;
+        }
+
+        .metric-card-description {
+            font-size: 9pt;
+            color: var(--body);
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 9pt;
+        }
+
+        th {
+            background-color: var(--teal-light);
+            color: var(--navy);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        td {
+            background-color: white;
+            color: var(--body);
+        }
+
+        .table-alt-row:nth-child(even) {
+            background-color: var(--bg);
+        }
+
+        .priority-matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--border);
+            margin-top: 30px;
+            position: relative;
+        }
+
+        .priority-matrix-quadrant {
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .quadrant-label-top {
+            position: absolute;
+            top: 5px;
+            font-family: 'DM Mono', monospace;
+            font-size: 8pt;
+            color: var(--muted);
+        }
+
+        .quadrant-label-left {
+            position: absolute;
+            left: 5px;
+            font-family: 'DM Mono', monospace;
+            font-size: 8pt;
+            color: var(--muted);
+            transform: rotate(-90deg);
+            transform-origin: left top 0;
+        }
+
+        .matrix-axis-x {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'DM Mono', monospace;
+            font-size: 9pt;
+            color: var(--muted);
+        }
+
+        .matrix-axis-y {
+            position: absolute;
+            left: -35px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            font-family: 'DM Mono', monospace;
+            font-size: 9pt;
+            color: var(--muted);
+        }
+
+        .initiative-card {
+            background-color: white;
+            border: 1px solid var(--border);
+            padding: 8px;
+            margin: 5px;
+            border-radius: 3px;
+            font-size: 8pt;
+            text-align: left;
+            width: 90%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .initiative-card-title {
+            font-weight: bold;
+            color: var(--navy);
+            margin-bottom: 3px;
+        }
+
+        .initiative-card-description {
+            color: var(--body);
+        }
+
+        .meeting-table th:nth-child(1) { width: 15%; }
+        .meeting-table th:nth-child(2) { width: 20%; }
+        .meeting-table th:nth-child(3) { width: 15%; }
+        .meeting-table th:nth-child(4) { width: 10%; }
+        .meeting-table th:nth-child(5) { width: 40%; }
+
+        .action-plan-table th:nth-child(1) { width: 15%; }
+        .action-plan-table th:nth-child(2) { width: 35%; }
+        .action-plan-table th:nth-child(3) { width: 20%; }
+        .action-plan-table th:nth-child(4) { width: 30%; }
+
+        .phase-header {
+            background-color: var(--teal-light);
+            color: var(--navy);
+            font-family: 'DM Serif Display', serif;
+            font-size: 14pt;
+            padding: 10px 12px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--teal);
+        }
+
+    </style>
+</head>
+<body>
+</head>
+<body>
+    <div class="page cover-page" id="page1">
+        <div class="cover-top-bar"></div>
+        <div class="cover-content">
+            <div class="cover-title">{{dim4_toolkit_title}}</div>
+            <div class="cover-subtitle">{{dim4_toolkit_subtitle}}</div>
+            <div class="cover-meta-grid">
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Business Name</span>
+                    <span class="cover-meta-value">{{business_name}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Industry</span>
+                    <span class="cover-meta-value">{{industry}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Dimension Score</span>
+                    <span class="cover-meta-value">{{dim_score}}/100</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Revenue Band</span>
+                    <span class="cover-meta-value">{{revenue_band}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Staff Count</span>
+                    <span class="cover-meta-value">{{staff_count}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Years Operating</span>
+                    <span class="cover-meta-value">{{years_operating}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Report Date</span>
+                    <span class="cover-meta-value">{{report_date}}</span>
+                </div>
+                <div class="cover-meta-item">
+                    <span class="cover-meta-label">Prepared For</span>
+                    <span class="cover-meta-value">{{client_name}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="cover-footer">
+            Praxis AI - Business Toolkit | {{dim4_document_version}}
+        </div>
+    </div>
+    <div class="page inner-page" id="page2">
+        <div class="page-header">
+            <span class="brand-name">Praxis AI</span>
+            <span class="doc-meta">Toolkit 4: 90-Day Execution Planner | Page 2 of 5</span>
+        </div>
+        <div class="content-area">
+            <h1 class="section-title">Diagnostic Summary: Strategy to Execution</h1>
+            <p>{{dim4_diagnostic_summary_intro}}</p>
+
+            <div class="metric-card-container">
+                <div class="metric-card">
+                    <div class="metric-card-label">Overall Score</div>
+                    <div class="metric-card-value">{{dim_score}}/100</div>
+                    <div class="metric-card-description">{{dim4_overall_score_description}}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-label">Primary Gap Identified</div>
+                    <div class="metric-card-value">{{dim4_primary_gap}}</div>
+                    <div class="metric-card-description">{{dim4_primary_gap_description}}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-label">Key Strength</div>
+                    <div class="metric-card-value">{{dim4_key_strength}}</div>
+                    <div class="metric-card-description">{{dim4_key_strength_description}}</div>
+                </div>
+            </div>
+
+            <h2 class="subsection-title">Current State Assessment</h2>
+            <p>{{dim4_current_state_intro}}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Current Reality</th>
+                        <th>Impact on Business</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Strategy Clarity</td>
+                        <td>{{dim4_strategy_clarity_current}}</td>
+                        <td>{{dim4_strategy_clarity_impact}}</td>
+                    </tr>
+                    <tr>
+                        <td>Execution Discipline</td>
+                        <td>{{dim4_execution_discipline_current}}</td>
+                        <td>{{dim4_execution_discipline_impact}}</td>
+                    </tr>
+                    <tr>
+                        <td>Accountability & Ownership</td>
+                        <td>{{dim4_accountability_current}}</td>
+                        <td>{{dim4_accountability_impact}}</td>
+                    </tr>
+                    <tr>
+                        <td>Performance Monitoring</td>
+                        <td>{{dim4_performance_monitoring_current}}</td>
+                        <td>{{dim4_performance_monitoring_impact}}</td>
+                    </tr>
+                    <tr>
+                        <td>Resource Alignment</td>
+                        <td>{{dim4_resource_alignment_current}}</td>
+                        <td>{{dim4_resource_alignment_impact}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>{{dim4_current_state_conclusion}}</p>
+        </div>
+        <div class="page-footer">
+            <span class="disclaimer">{{dim4_disclaimer_text}}</span>
+            <span class="page-number">Page 2 of 5</span>
+        </div>
+    </div>
+    <div class="page inner-page" id="page3">
+        <div class="page-header">
+            <span class="brand-name">Praxis AI</span>
+            <span class="doc-meta">Toolkit 4: 90-Day Execution Planner | Page 3 of 5</span>
+        </div>
+        <div class="content-area">
+            <h1 class="section-title">Strategic Priorities: Impact vs. Effort</h1>
+            <p>{{dim4_strategic_priorities_intro}}</p>
+
+            <div class="priority-matrix">
+                <div class="priority-matrix-quadrant" style="grid-area: 1 / 2 / 2 / 3;">
+                    <span class="quadrant-label-top">High Impact</span>
+                    <span class="quadrant-label-left">Low Effort</span>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_1_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_1_description}}</div>
+                    </div>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_2_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_2_description}}</div>
+                    </div>
+                </div>
+                <div class="priority-matrix-quadrant" style="grid-area: 1 / 1 / 2 / 2;">
+                    <span class="quadrant-label-top">High Impact</span>
+                    <span class="quadrant-label-left">High Effort</span>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_3_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_3_description}}</div>
+                    </div>
+                </div>
+                <div class="priority-matrix-quadrant" style="grid-area: 2 / 2 / 3 / 3;">
+                    <span class="quadrant-label-top">Low Impact</span>
+                    <span class="quadrant-label-left">Low Effort</span>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_4_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_4_description}}</div>
+                    </div>
+                </div>
+                <div class="priority-matrix-quadrant" style="grid-area: 2 / 1 / 3 / 2;">
+                    <span class="quadrant-label-top">Low Impact</span>
+                    <span class="quadrant-label-left">High Effort</span>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_5_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_5_description}}</div>
+                    </div>
+                    <div class="initiative-card">
+                        <div class="initiative-card-title">{{dim4_initiative_6_title}}</div>
+                        <div class="initiative-card-description">{{dim4_initiative_6_description}}</div>
+                    </div>
+                </div>
+                <div class="matrix-axis-x" style="left: 75%;">Effort &rarr;</div>
+                <div class="matrix-axis-x" style="left: 25%;">Effort &rarr;</div>
+                <div class="matrix-axis-y" style="top: 25%;">Impact &rarr;</div>
+                <div class="matrix-axis-y" style="top: 75%;">Impact &rarr;</div>
+            </div>
+            <p>{{dim4_strategic_priorities_conclusion}}</p>
+        </div>
+        <div class="page-footer">
+            <span class="disclaimer">{{dim4_disclaimer_text}}</span>
+            <span class="page-number">Page 3 of 5</span>
+        </div>
+    </div>
+    <div class="page inner-page" id="page4">
+        <div class="page-header">
+            <span class="brand-name">Praxis AI</span>
+            <span class="doc-meta">Toolkit 4: 90-Day Execution Planner | Page 4 of 5</span>
+        </div>
+        <div class="content-area">
+            <h1 class="section-title">Meeting Rhythm & Accountability</h1>
+            <p>{{dim4_meeting_rhythm_intro}}</p>
+
+            <table class="meeting-table">
+                <thead>
+                    <tr>
+                        <th>Meeting Cadence</th>
+                        <th>Purpose</th>
+                        <th>Attendees</th>
+                        <th>Duration</th>
+                        <th>Key Agenda Items</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Daily Standup</td>
+                        <td>{{dim4_daily_standup_purpose}}</td>
+                        <td>{{dim4_daily_standup_attendees}}</td>
+                        <td>{{dim4_daily_standup_duration}}</td>
+                        <td>{{dim4_daily_standup_agenda}}</td>
+                    </tr>
+                    <tr>
+                        <td>Weekly Review</td>
+                        <td>{{dim4_weekly_review_purpose}}</td>
+                        <td>{{dim4_weekly_review_attendees}}</td>
+                        <td>{{dim4_weekly_review_duration}}</td>
+                        <td>{{dim4_weekly_review_agenda}}</td>
+                    </tr>
+                    <tr>
+                        <td>Monthly Strategy</td>
+                        <td>{{dim4_monthly_strategy_purpose}}</td>
+                        <td>{{dim4_monthly_strategy_attendees}}</td>
+                        <td>{{dim4_monthly_strategy_duration}}</td>
+                        <td>{{dim4_monthly_strategy_agenda}}</td>
+                    </tr>
+                    <tr>
+                        <td>Quarterly Planning</td>
+                        <td>{{dim4_quarterly_planning_purpose}}</td>
+                        <td>{{dim4_quarterly_planning_attendees}}</td>
+                        <td>{{dim4_quarterly_planning_duration}}</td>
+                        <td>{{dim4_quarterly_planning_agenda}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>{{dim4_meeting_rhythm_conclusion}}</p>
+        </div>
+        <div class="page-footer">
+            <span class="disclaimer">{{dim4_disclaimer_text}}</span>
+            <span class="page-number">Page 4 of 5</span>
+        </div>
+    </div>
+    <div class="page inner-page" id="page5">
+        <div class="page-header">
+            <span class="brand-name">Praxis AI</span>
+            <span class="doc-meta">Toolkit 4: 90-Day Execution Planner | Page 5 of 5</span>
+        </div>
+        <div class="content-area">
+            <h1 class="section-title">90-Day Action Plan</h1>
+            <p>{{dim4_action_plan_intro}}</p>
+
+            <div class="phase-header">Phase 1: {{dim4_phase1_title}}</div>
+            <p>{{dim4_phase1_description}}</p>
+            <table class="action-plan-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>Owner</th>
+                        <th>Success Measures</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{dim4_phase1_action1_title}}</td>
+                        <td>{{dim4_phase1_action1_details}}</td>
+                        <td>{{dim4_phase1_action1_owner}}</td>
+                        <td>{{dim4_phase1_action1_success}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{dim4_phase1_action2_title}}</td>
+                        <td>{{dim4_phase1_action2_details}}</td>
+                        <td>{{dim4_phase1_action2_owner}}</td>
+                        <td>{{dim4_phase1_action2_success}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="phase-header">Phase 2: {{dim4_phase2_title}}</div>
+            <p>{{dim4_phase2_description}}</p>
+            <table class="action-plan-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>Owner</th>
+                        <th>Success Measures</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{dim4_phase2_action1_title}}</td>
+                        <td>{{dim4_phase2_action1_details}}</td>
+                        <td>{{dim4_phase2_action1_owner}}</td>
+                        <td>{{dim4_phase2_action1_success}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{dim4_phase2_action2_title}}</td>
+                        <td>{{dim4_phase2_action2_details}}</td>
+                        <td>{{dim4_phase2_action2_owner}}</td>
+                        <td>{{dim4_phase2_action2_success}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="phase-header">Phase 3: {{dim4_phase3_title}}</div>
+            <p>{{dim4_phase3_description}}</p>
+            <table class="action-plan-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>Owner</th>
+                        <th>Success Measures</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{dim4_phase3_action1_title}}</td>
+                        <td>{{dim4_phase3_action1_details}}</td>
+                        <td>{{dim4_phase3_action1_owner}}</td>
+                        <td>{{dim4_phase3_action1_success}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{dim4_phase3_action2_title}}</td>
+                        <td>{{dim4_phase3_action2_details}}</td>
+                        <td>{{dim4_phase3_action2_owner}}</td>
+                        <td>{{dim4_phase3_action2_success}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="subsection-title">Key Outcome Metrics</h2>
+            <p>{{dim4_outcome_metrics_intro}}</p>
+            <div class="metric-card-container">
+                <div class="metric-card">
+                    <div class="metric-card-label">Metric 1</div>
+                    <div class="metric-card-value">{{dim4_outcome_metric1_value}}</div>
+                    <div class="metric-card-description">{{dim4_outcome_metric1_description}}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-label">Metric 2</div>
+                    <div class="metric-card-value">{{dim4_outcome_metric2_value}}</div>
+                    <div class="metric-card-description">{{dim4_outcome_metric2_description}}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-label">Metric 3</div>
+                    <div class="metric-card-value">{{dim4_outcome_metric3_value}}</div>
+                    <div class="metric-card-description">{{dim4_outcome_metric3_description}}</div>
+                </div>
+            </div>
+            <p>{{dim4_outcome_metrics_conclusion}}</p>
+        </div>
+        <div class="page-footer">
+            <span class="disclaimer">{{dim4_disclaimer_text}}</span>
+            <span class="page-number">Page 5 of 5</span>
+        </div>
+    </div>
+</body>
+</html>

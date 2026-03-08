@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Praxis AI — Process Audit &amp; Redesign Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#1a1a2e; --teal:#4bb4a5; --teal-light:#e8f7f5; --teal-mid:#2a8a7d;
+  --red:#c0392b; --red-light:#fdf2f2; --amber:#d4820a; --amber-light:#fdf3e3;
+  --green:#27836a; --green-light:#e8f5f1;
+  --body:#2d2d2d; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb; --white:#ffffff;
+}
+@page { size: A4; margin: 0; }
+@page { size: A4; margin: 0; }
+@page { size: A4; margin: 0; }
+body { font-family:'DM Sans',sans-serif; font-size:10.5pt; color:var(--body); background:var(--white); line-height:1.65; -webkit-print-color-adjust:exact; print-color-adjust:exact; }.page { width:210mm; min-height:297mm; margin:0 auto; background:var(--white); display:flex; flex-direction:column; page-break-after:always; }
+.page:last-child { page-break-after:avoid; }
+
+/* Cover */
+.cover { background:var(--navy); min-height:297mm; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+.cover::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--teal),#5ac3b4); }
+.cover-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(75,180,165,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(75,180,165,0.05) 1px,transparent 1px); background-size:40px 40px; }
+.cover-top { padding:36px 44px 0; display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:2; }
+.cover-logo { font-family:'DM Serif Display',serif; font-size:11pt; font-weight:bold; color:var(--teal); letter-spacing:0.1em; text-transform:uppercase; }
+.cover-logo span { color:var(--white); }
+.cover-date { font-size:8pt; color:rgba(255,255,255,0.4); text-align:right; line-height:1.6; text-transform:uppercase; letter-spacing:0.08em; }
+.cover-body { flex:1; padding:0 44px; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:2; }
+.cover-tag { font-size:8pt; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--teal); margin-bottom:14px; }
+.cover-title { font-family:'DM Serif Display',serif; font-size:28pt; line-height:1.15; color:var(--white); margin-bottom:10px; }
+.cover-subtitle { font-size:11pt; color:rgba(255,255,255,0.65); margin-bottom:32px; }
+.cover-divider { width:50px; height:3px; background:var(--teal); margin-bottom:28px; }
+.cover-meta-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px 32px; max-width:480px; }
+.cover-meta-item label { display:block; font-size:7.5pt; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal); margin-bottom:3px; }
+.cover-meta-item p { font-size:10pt; color:var(--white); margin:0; }
+.cover-bottom { padding:20px 44px; border-top:1px solid rgba(75,180,165,0.2); display:flex; justify-content:space-between; align-items:center; position:relative; z-index:2; }
+.cover-bottom p { font-size:8pt; color:rgba(255,255,255,0.35); margin:0; }
+
+/* Inner page */
+.page-header { background:var(--navy); padding:11px 44px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+.page-header .brand { font-family:'DM Serif Display',serif; font-size:8.5pt; font-weight:bold; color:var(--teal); letter-spacing:0.1em; text-transform:uppercase; }
+.page-header .doc-meta { font-size:8pt; color:rgba(255,255,255,0.45); text-align:right; line-height:1.5; }
+.page-footer { padding:11px 44px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; margin-top:auto; }
+.page-footer p { font-size:7.5pt; color:var(--muted); margin:0; }
+.content { flex:1; padding:28px 44px 20px; }
+
+/* Typography */
+.section-label { font-size:7.5pt; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--teal); margin-bottom:5px; }
+h1 { font-family:'DM Serif Display',serif; font-size:18pt; color:var(--navy); line-height:1.2; margin-bottom:6px; padding-bottom:10px; border-bottom:2px solid var(--teal); }
+h2 { font-family:'DM Serif Display',serif; font-size:12pt; color:var(--navy); margin-top:22px; margin-bottom:8px; }
+h3 { font-size:10pt; font-weight:600; color:var(--navy); margin-top:14px; margin-bottom:4px; }
+p { margin-bottom:9px; }
+ul,ol { margin:5px 0 9px 20px; }
+li { margin-bottom:3px; font-size:10pt; }
+
+/* Callouts */
+.callout { border-left:4px solid var(--teal); background:var(--teal-light); padding:11px 15px; margin:12px 0; border-radius:0 4px 4px 0; }
+.callout.critical { border-left-color:var(--red); background:var(--red-light); }
+.callout.warning  { border-left-color:var(--amber); background:var(--amber-light); }
+.callout-label { font-size:7.5pt; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal); margin-bottom:4px; }
+.callout.critical .callout-label { color:var(--red); }
+.callout.warning  .callout-label { color:var(--amber); }
+.callout p { margin:0; font-size:9.5pt; }
+
+/* Process audit table */
+table { width:100%; border-collapse:collapse; margin:12px 0; font-size:9.5pt; }
+thead tr { background:var(--navy); color:var(--white); }
+thead th { padding:8px 12px; text-align:left; font-size:8pt; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; }
+tbody tr { border-bottom:1px solid var(--border); }
+tbody tr:nth-child(even) { background:var(--bg); }
+tbody td { padding:8px 12px; vertical-align:top; }
+tbody td:first-child { font-weight:600; color:var(--navy); }
+
+/* Status chips */
+.chip { display:inline-block; padding:2px 8px; border-radius:3px; font-size:7.5pt; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
+.chip.red    { background:var(--red-light);   color:var(--red); }
+.chip.amber  { background:var(--amber-light); color:var(--amber); }
+.chip.green  { background:var(--green-light); color:var(--green); }
+
+/* Process flow diagram */
+.process-flow { display:flex; align-items:stretch; gap:0; margin:14px 0; }
+.process-step { flex:1; background:var(--bg); border:1px solid var(--border); border-right:none; padding:12px 10px; text-align:center; position:relative; }
+.process-step:last-child { border-right:1px solid var(--border); }
+.process-step::after { content:'→'; position:absolute; right:-12px; top:50%; transform:translateY(-50%); color:var(--teal); font-size:14pt; font-weight:bold; z-index:1; }
+.process-step:last-child::after { display:none; }
+.process-step.gap { background:var(--red-light); border-color:var(--red); }
+.process-step .step-num { font-size:7.5pt; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.process-step .step-name { font-size:9pt; font-weight:600; color:var(--navy); margin-bottom:3px; }
+.process-step .step-note { font-size:8pt; color:var(--muted); line-height:1.4; }
+.process-step.gap .step-name { color:var(--red); }
+
+/* Redesign action cards */
+.action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
+.action-card { border:1px solid var(--border); border-top:3px solid var(--teal); border-radius:4px; padding:14px; }
+.action-card.priority { border-top-color:var(--red); }
+.action-card .action-tag { font-size:7.5pt; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.action-card h3 { font-size:10pt; color:var(--navy); margin:0 0 6px; }
+.action-card p { font-size:9pt; color:var(--muted); margin:0 0 8px; }
+.action-card .action-owner { font-size:8pt; font-weight:600; color:var(--teal); }
+
+/* Metric row */
+.metric-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0; }
+.metric-card { background:var(--navy); border-radius:6px; padding:14px 12px; text-align:center; }
+.metric-card .val { font-family:'DM Serif Display',serif; font-size:18pt; color:var(--teal); line-height:1; margin-bottom:4px; }
+.metric-card .lbl { font-size:8pt; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:3px; }
+.metric-card .note { font-size:8pt; color:rgba(255,255,255,0.4); line-height:1.4; }
+
+/* SOP checklist */
+.sop-list { margin:10px 0; }
+.sop-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+.sop-item:last-child { border-bottom:none; }
+.sop-box { width:16px; height:16px; border:2px solid var(--border); border-radius:3px; flex-shrink:0; margin-top:2px; }
+.sop-text { font-size:10pt; }
+.sop-text strong { color:var(--navy); }
+.sop-text span { display:block; font-size:9pt; color:var(--muted); margin-top:1px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page">
+<div class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-top">
+    <div class="cover-logo">Praxis <span>AI</span></div>
+    <div class="cover-date">Process &amp; Workflow Toolkit<br>Prepared: {{report_date}}<br>Confidential</div>
+  </div>
+  <div class="cover-body">
+    <div class="cover-tag">Dimension 01 — Process &amp; Workflow</div>
+    <div class="cover-title">Process Audit &amp; Redesign Map</div>
+    <div class="cover-subtitle">A structured audit of your current workflows with a prioritised redesign roadmap — built specifically for {{business_name}}.</div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-grid">
+      <div class="cover-meta-item"><label>Business</label><p>{{business_name}}</p></div>
+      <div class="cover-meta-item"><label>Industry</label><p>{{industry}}</p></div>
+      <div class="cover-meta-item"><label>Process Score</label><p>{{dim1_score}} / 10</p></div>
+      <div class="cover-meta-item"><label>Revenue Band</label><p>{{revenue_band}}</p></div>
+      <div class="cover-meta-item"><label>Staff Count</label><p>{{staff_count}}</p></div>
+      <div class="cover-meta-item"><label>Years Operating</label><p>{{years_operating}}</p></div>
+    </div>
+  </div>
+  <div class="cover-bottom">
+    <p>Praxis AI — Operational Intelligence for Australian SMBs</p>
+    <p>praxisai.com.au</p>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 2: DIAGNOSTIC SUMMARY -->
+<div class="page">
+<div class="page-header">
+  <div class="brand">Praxis <span style="color:#fff">AI</span></div>
+  <div class="doc-meta">{{business_name}} — Process Audit &amp; Redesign Map<br>{{report_date}}</div>
+</div>
+<div class="content">
+  <div class="section-label">Your Starting Point</div>
+  <h1>Process &amp; Workflow Diagnostic Summary</h1>
+
+  <p>{{diagnostic_summary}}</p>
+
+  <div class="callout critical">
+    <div class="callout-label">Primary Gap Identified</div>
+    <p>{{primary_gap}}</p>
+  </div>
+
+  <div class="metric-row">
+    <div class="metric-card"><div class="val">{{dim1_score}}/10</div><div class="lbl">Process Score</div><div class="note">{{score_context}}</div></div>
+    <div class="metric-card"><div class="val">{{manual_steps_pct}}</div><div class="lbl">Manual Steps Est.</div><div class="note">{{manual_steps_note}}</div></div>
+    <div class="metric-card"><div class="val">{{rework_cost}}</div><div class="lbl">Est. Rework Cost</div><div class="note">{{rework_note}}</div></div>
+  </div>
+
+  <h2>Current State Assessment</h2>
+  <p>{{current_state_para}}</p>
+
+  <table>
+    <thead>
+      <tr><th>Process Area</th><th>Current State</th><th>Gap Severity</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>{{process_area_1}}</td><td>{{process_area_1_state}}</td><td><span class="chip {{process_area_1_chip}}">{{process_area_1_severity}}</span></td><td>{{process_area_1_impact}}</td></tr>
+      <tr><td>{{process_area_2}}</td><td>{{process_area_2_state}}</td><td><span class="chip {{process_area_2_chip}}">{{process_area_2_severity}}</span></td><td>{{process_area_2_impact}}</td></tr>
+      <tr><td>{{process_area_3}}</td><td>{{process_area_3_state}}</td><td><span class="chip {{process_area_3_chip}}">{{process_area_3_severity}}</span></td><td>{{process_area_3_impact}}</td></tr>
+      <tr><td>{{process_area_4}}</td><td>{{process_area_4_state}}</td><td><span class="chip {{process_area_4_chip}}">{{process_area_4_severity}}</span></td><td>{{process_area_4_impact}}</td></tr>
+      <tr><td>{{process_area_5}}</td><td>{{process_area_5_state}}</td><td><span class="chip {{process_area_5_chip}}">{{process_area_5_severity}}</span></td><td>{{process_area_5_impact}}</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="page-footer">
+  <p>Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</p>
+  <p>Page 2 of 5</p>
+</div>
+</div>
+
+<!-- PAGE 3: PROCESS FLOW MAP -->
+<div class="page">
+<div class="page-header">
+  <div class="brand">Praxis <span style="color:#fff">AI</span></div>
+  <div class="doc-meta">{{business_name}} — Process Audit &amp; Redesign Map<br>{{report_date}}</div>
+</div>
+<div class="content">
+  <div class="section-label">Core Workflow Analysis</div>
+  <h1>Your Primary Process Flow</h1>
+
+  <p>{{flow_intro}}</p>
+
+  <h2>Current State — {{primary_workflow_name}}</h2>
+  <div class="process-flow">
+    <div class="process-step {{flow_step_1_class}}">
+      <div class="step-num">Step 1</div>
+      <div class="step-name">{{flow_step_1_name}}</div>
+      <div class="step-note">{{flow_step_1_note}}</div>
+    </div>
+    <div class="process-step {{flow_step_2_class}}">
+      <div class="step-num">Step 2</div>
+      <div class="step-name">{{flow_step_2_name}}</div>
+      <div class="step-note">{{flow_step_2_note}}</div>
+    </div>
+    <div class="process-step {{flow_step_3_class}}">
+      <div class="step-num">Step 3</div>
+      <div class="step-name">{{flow_step_3_name}}</div>
+      <div class="step-note">{{flow_step_3_note}}</div>
+    </div>
+    <div class="process-step {{flow_step_4_class}}">
+      <div class="step-num">Step 4</div>
+      <div class="step-name">{{flow_step_4_name}}</div>
+      <div class="step-note">{{flow_step_4_note}}</div>
+    </div>
+    <div class="process-step {{flow_step_5_class}}">
+      <div class="step-num">Step 5</div>
+      <div class="step-name">{{flow_step_5_name}}</div>
+      <div class="step-note">{{flow_step_5_note}}</div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-label">Bottleneck Identified</div>
+    <p>{{bottleneck_description}}</p>
+  </div>
+
+  <h2>Redesigned Future State</h2>
+  <p>{{future_state_intro}}</p>
+
+  <div class="action-grid">
+    <div class="action-card priority">
+      <div class="action-tag">Priority Redesign — Week 1–2</div>
+      <h3>{{redesign_1_title}}</h3>
+      <p>{{redesign_1_desc}}</p>
+      <div class="action-owner">Owner: {{redesign_1_owner}}</div>
+    </div>
+    <div class="action-card priority">
+      <div class="action-tag">Priority Redesign — Week 3–4</div>
+      <h3>{{redesign_2_title}}</h3>
+      <p>{{redesign_2_desc}}</p>
+      <div class="action-owner">Owner: {{redesign_2_owner}}</div>
+    </div>
+    <div class="action-card">
+      <div class="action-tag">Secondary Redesign — Month 2</div>
+      <h3>{{redesign_3_title}}</h3>
+      <p>{{redesign_3_desc}}</p>
+      <div class="action-owner">Owner: {{redesign_3_owner}}</div>
+    </div>
+    <div class="action-card">
+      <div class="action-tag">Secondary Redesign — Month 3</div>
+      <h3>{{redesign_4_title}}</h3>
+      <p>{{redesign_4_desc}}</p>
+      <div class="action-owner">Owner: {{redesign_4_owner}}</div>
+    </div>
+  </div>
+</div>
+<div class="page-footer">
+  <p>Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</p>
+  <p>Page 3 of 5</p>
+</div>
+</div>
+
+<!-- PAGE 4: SOP FRAMEWORK -->
+<div class="page">
+<div class="page-header">
+  <div class="brand">Praxis <span style="color:#fff">AI</span></div>
+  <div class="doc-meta">{{business_name}} — Process Audit &amp; Redesign Map<br>{{report_date}}</div>
+</div>
+<div class="content">
+  <div class="section-label">Standard Operating Procedures</div>
+  <h1>SOP Build Checklist</h1>
+
+  <p>{{sop_intro}}</p>
+
+  <h2>Priority SOPs to Document First</h2>
+  <div class="sop-list">
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_1_title}}</strong><span>{{sop_1_desc}}</span></div></div>
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_2_title}}</strong><span>{{sop_2_desc}}</span></div></div>
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_3_title}}</strong><span>{{sop_3_desc}}</span></div></div>
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_4_title}}</strong><span>{{sop_4_desc}}</span></div></div>
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_5_title}}</strong><span>{{sop_5_desc}}</span></div></div>
+    <div class="sop-item"><div class="sop-box"></div><div class="sop-text"><strong>{{sop_6_title}}</strong><span>{{sop_6_desc}}</span></div></div>
+  </div>
+
+  <h2>SOP Template Structure</h2>
+  <table>
+    <thead>
+      <tr><th>Section</th><th>What to Include</th><th>Time to Complete</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Purpose</td><td>Why this process exists and what outcome it produces</td><td>5 min</td></tr>
+      <tr><td>Scope</td><td>Who this applies to and when it is triggered</td><td>5 min</td></tr>
+      <tr><td>Step-by-step</td><td>Numbered actions with screenshots or screen recordings</td><td>20–40 min</td></tr>
+      <tr><td>Decision points</td><td>If/then logic for common variations</td><td>10 min</td></tr>
+      <tr><td>Tools required</td><td>Software, templates, or resources needed</td><td>5 min</td></tr>
+      <tr><td>Owner &amp; review date</td><td>Who maintains this SOP and when it is next reviewed</td><td>2 min</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Recommended Tool</div>
+    <p>{{sop_tool_recommendation}}</p>
+  </div>
+</div>
+<div class="page-footer">
+  <p>Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</p>
+  <p>Page 4 of 5</p>
+</div>
+</div>
+
+<!-- PAGE 5: 90-DAY IMPLEMENTATION PLAN -->
+<div class="page">
+<div class="page-header">
+  <div class="brand">Praxis <span style="color:#fff">AI</span></div>
+  <div class="doc-meta">{{business_name}} — Process Audit &amp; Redesign Map<br>{{report_date}}</div>
+</div>
+<div class="content">
+  <div class="section-label">Implementation Roadmap</div>
+  <h1>90-Day Process Improvement Plan</h1>
+
+  <table>
+    <thead>
+      <tr><th>Phase</th><th>Action</th><th>Owner</th><th>Success Measure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Days 1–30<br><span style="font-size:8pt;color:var(--muted);font-weight:400;">Stabilise</span></td><td>{{phase1_action_1}}</td><td>{{phase1_owner_1}}</td><td>{{phase1_measure_1}}</td></tr>
+      <tr><td></td><td>{{phase1_action_2}}</td><td>{{phase1_owner_2}}</td><td>{{phase1_measure_2}}</td></tr>
+      <tr><td></td><td>{{phase1_action_3}}</td><td>{{phase1_owner_3}}</td><td>{{phase1_measure_3}}</td></tr>
+      <tr><td>Days 31–60<br><span style="font-size:8pt;color:var(--muted);font-weight:400;">Build</span></td><td>{{phase2_action_1}}</td><td>{{phase2_owner_1}}</td><td>{{phase2_measure_1}}</td></tr>
+      <tr><td></td><td>{{phase2_action_2}}</td><td>{{phase2_owner_2}}</td><td>{{phase2_measure_2}}</td></tr>
+      <tr><td></td><td>{{phase2_action_3}}</td><td>{{phase2_owner_3}}</td><td>{{phase2_measure_3}}</td></tr>
+      <tr><td>Days 61–90<br><span style="font-size:8pt;color:var(--muted);font-weight:400;">Scale</span></td><td>{{phase3_action_1}}</td><td>{{phase3_owner_1}}</td><td>{{phase3_measure_1}}</td></tr>
+      <tr><td></td><td>{{phase3_action_2}}</td><td>{{phase3_owner_2}}</td><td>{{phase3_measure_2}}</td></tr>
+      <tr><td></td><td>{{phase3_action_3}}</td><td>{{phase3_owner_3}}</td><td>{{phase3_measure_3}}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Expected Outcomes at 90 Days</h2>
+  <div class="metric-row">
+    <div class="metric-card"><div class="val">{{outcome_1_val}}</div><div class="lbl">{{outcome_1_lbl}}</div><div class="note">{{outcome_1_note}}</div></div>
+    <div class="metric-card"><div class="val">{{outcome_2_val}}</div><div class="lbl">{{outcome_2_lbl}}</div><div class="note">{{outcome_2_note}}</div></div>
+    <div class="metric-card"><div class="val">{{outcome_3_val}}</div><div class="lbl">{{outcome_3_lbl}}</div><div class="note">{{outcome_3_note}}</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Next Step</div>
+    <p>{{next_step_recommendation}}</p>
+  </div>
+</div>
+<div class="page-footer">
+  <p>Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</p>
+  <p>Page 5 of 5</p>
+</div>
+</div>
+
+</body>
+</html>
