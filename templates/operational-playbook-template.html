@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Praxis AI — Personalised Operational Playbook</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #1a1a2e;
+      --teal:        #4bb4a5;
+      --teal-light:  #e8f7f5;
+      --teal-mid:    #2a8a7d;
+      --red:         #c0392b;
+      --red-light:   #fdf2f2;
+      --amber:       #d4820a;
+      --amber-light: #fdf3e3;
+      --body:        #2d2d2d;
+      --muted:       #6b7280;
+      --border:      #e5e7eb;
+      --bg-light:    #f9fafb;
+      --white:       #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 10.5pt;
+      color: var(--body);
+      background: var(--white);
+      line-height: 1.65;
+    }
+
+    /* ─── Page Wrapper ──────────────────────────────────────────────── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Page Header (inner pages) ─────────────────────────────────── */
+    .page-header {
+      background: var(--navy);
+      padding: 11px 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .page-header .brand {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 8.5pt;
+      font-weight: bold;
+      color: var(--teal);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .page-header .doc-meta {
+      font-size: 8pt;
+      color: rgba(255,255,255,0.45);
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    /* ─── Page Footer ───────────────────────────────────────────────── */
+    .page-footer {
+      padding: 11px 44px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+    .page-footer p {
+      font-size: 7.5pt;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ─── Content Area ──────────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      padding: 32px 44px 24px;
+    }
+
+    /* ─── Typography ────────────────────────────────────────────────── */
+    .section-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 20pt;
+      font-weight: bold;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 6px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--teal);
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 13pt;
+      color: var(--navy);
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 16px;
+      margin-bottom: 5px;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: var(--body);
+    }
+
+    ul, ol {
+      margin: 6px 0 10px 20px;
+    }
+    li { margin-bottom: 4px; }
+
+    /* ─── Cover Page ────────────────────────────────────────────────── */
+    .cover {
+      background: var(--navy);
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+    }
+    .cover-top {
+      padding: 36px 44px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .cover-logo {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 11pt;
+      font-weight: bold;
+      color: var(--teal);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .cover-logo span { color: var(--white); }
+    .cover-date {
+      font-size: 8pt;
+      color: rgba(255,255,255,0.4);
+      text-align: right;
+      line-height: 1.6;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .cover-body {
+      flex: 1;
+      padding: 0 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .cover-tag {
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 14px;
+    }
+    .cover-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 28pt;
+      font-weight: bold;
+      line-height: 1.15;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .cover-subtitle {
+      font-size: 11pt;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 32px;
+    }
+    .cover-divider {
+      width: 50px;
+      height: 3px;
+      background: var(--teal);
+      margin-bottom: 28px;
+    }
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px 32px;
+      max-width: 480px;
+    }
+    .cover-meta-item label {
+      display: block;
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 3px;
+    }
+    .cover-meta-item p {
+      font-size: 10pt;
+      color: var(--white);
+      margin: 0;
+    }
+
+    .cover-bottom {
+      padding: 20px 44px;
+      border-top: 1px solid rgba(75,180,165,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cover-bottom p {
+      font-size: 8pt;
+      color: rgba(255,255,255,0.35);
+      margin: 0;
+    }
+
+    /* ─── Score Summary Bar (full-width navy strip) ──────────────────── */
+    .score-strip {
+      background: var(--navy);
+      padding: 20px 44px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+    .score-cell {
+      text-align: center;
+    }
+    .score-cell .dim-lbl {
+      font-size: 7pt;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    .score-cell .score-num {
+      font-family: Georgia, serif;
+      font-size: 20pt;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .score-cell .score-num.critical { color: var(--red); }
+    .score-cell .score-num.warning  { color: var(--amber); }
+    .score-cell .score-num.good     { color: var(--teal); }
+    .score-cell .score-bar-track {
+      height: 3px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .score-cell .score-bar-fill { height: 100%; border-radius: 2px; }
+    .score-cell .score-bar-fill.critical { background: var(--red); }
+    .score-cell .score-bar-fill.warning  { background: var(--amber); }
+    .score-cell .score-bar-fill.good     { background: var(--teal); }
+
+    /* ─── Callout Boxes ─────────────────────────────────────────────── */
+    .callout {
+      border-left: 4px solid var(--teal);
+      background: var(--teal-light);
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .callout.critical {
+      border-left-color: var(--red);
+      background: var(--red-light);
+    }
+    .callout.warning {
+      border-left-color: var(--amber);
+      background: var(--amber-light);
+    }
+    .callout-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 5px;
+    }
+    .callout.critical .callout-label { color: var(--red); }
+    .callout.warning  .callout-label { color: var(--amber); }
+    .callout p { margin: 0; font-size: 9.5pt; }
+
+    /* ─── Gap Cards ─────────────────────────────────────────────────── */
+    .gap-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .gap-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      border-top: 3px solid var(--red);
+    }
+    .gap-card.secondary { border-top-color: var(--amber); }
+    .gap-card.tertiary  { border-top-color: var(--teal); }
+    .gap-card .gap-num {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    .gap-card h3 { font-size: 10.5pt; color: var(--navy); margin: 0 0 6px; }
+    .gap-card p  { font-size: 9pt; color: var(--muted); margin: 0; }
+
+    /* ─── ROI Cards ─────────────────────────────────────────────────── */
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .roi-card {
+      background: var(--navy);
+      border-radius: 8px;
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .roi-card .roi-val {
+      font-family: Georgia, serif;
+      font-size: 18pt;
+      font-weight: bold;
+      color: var(--teal);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .roi-card .roi-lbl {
+      font-size: 8pt;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.4;
+    }
+
+    /* ─── Phase Section Header ──────────────────────────────────────── */
+    .phase-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 20px 44px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+    }
+    .phase-header .phase-num {
+      font-family: Georgia, serif;
+      font-size: 36pt;
+      font-weight: bold;
+      color: rgba(75,180,165,0.3);
+      line-height: 1;
+    }
+    .phase-header .phase-info h2 {
+      font-family: Georgia, serif;
+      font-size: 16pt;
+      color: var(--white);
+      margin: 0 0 3px;
+    }
+    .phase-header .phase-info p {
+      font-size: 9pt;
+      color: rgba(255,255,255,0.55);
+      margin: 0;
+    }
+
+    /* ─── Dimension Badge ───────────────────────────────────────────── */
+    .dim-badge {
+      display: inline-block;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 7pt;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+    .dim-badge.critical { background: var(--red); }
+    .dim-badge.warning  { background: var(--amber); }
+
+    /* ─── Action Table ──────────────────────────────────────────────── */
+    .action-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px;
+      font-size: 9pt;
+    }
+    .action-table thead tr {
+      background: var(--navy);
+      color: var(--white);
+    }
+    .action-table thead th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 7.5pt;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .action-table tbody tr:nth-child(even) { background: var(--bg-light); }
+    .action-table tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .p-high { color: var(--red);   font-weight: 700; font-size: 7.5pt; text-transform: uppercase; }
+    .p-med  { color: var(--amber); font-weight: 700; font-size: 7.5pt; text-transform: uppercase; }
+    .p-low  { color: var(--teal);  font-weight: 700; font-size: 7.5pt; text-transform: uppercase; }
+
+    /* ─── KPI Table ─────────────────────────────────────────────────── */
+    .kpi-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px;
+      font-size: 9pt;
+    }
+    .kpi-table thead tr { background: var(--teal); color: var(--white); }
+    .kpi-table thead th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 7.5pt;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .kpi-table tbody tr:nth-child(even) { background: var(--teal-light); }
+    .kpi-table tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ─── Tools Table ───────────────────────────────────────────────── */
+    .tools-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px;
+      font-size: 9pt;
+    }
+    .tools-table thead tr { background: var(--navy); color: var(--white); }
+    .tools-table thead th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 7.5pt;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .tools-table tbody tr:nth-child(even) { background: var(--bg-light); }
+    .tools-table tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ─── Checklist ─────────────────────────────────────────────────── */
+    .checklist {
+      list-style: none;
+      margin: 8px 0 14px;
+      padding: 0;
+    }
+    .checklist li {
+      padding: 6px 0 6px 26px;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+      font-size: 9.5pt;
+    }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--teal);
+      font-size: 12pt;
+      line-height: 1;
+      top: 5px;
+    }
+
+    /* ─── Print ─────────────────────────────────────────────────────── */
+    .page-break { page-break-before: always; }
+    @media print {
+      .page { margin: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 1 — COVER
+════════════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="cover">
+
+    <div class="cover-top">
+      <div class="cover-logo">Praxis <span>AI</span></div>
+      <div class="cover-date">
+        Personalised Operational Playbook<br>
+        Confidential — Prepared for Recipient Only<br>
+        {{report_date}}
+      </div>
+    </div>
+
+    <div class="cover-body">
+      <p class="cover-tag">Praxis AI Operational Intelligence</p>
+      <h1 class="cover-title">{{business_name}}<br>90-Day Operational<br>Improvement Roadmap</h1>
+      <p class="cover-subtitle">Tailored to your critical gaps — ready to implement from Day 1</p>
+      <div class="cover-divider"></div>
+
+      <div class="cover-meta-grid">
+        <div class="cover-meta-item">
+          <label>Business</label>
+          <p>{{business_name}}</p>
+        </div>
+        <div class="cover-meta-item">
+          <label>Industry</label>
+          <p>{{industry}}</p>
+        </div>
+        <div class="cover-meta-item">
+          <label>Revenue Band</label>
+          <p>{{revenue_band}}</p>
+        </div>
+        <div class="cover-meta-item">
+          <label>Team Size</label>
+          <p>{{staff_count}} staff</p>
+        </div>
+        <div class="cover-meta-item">
+          <label>Years Operating</label>
+          <p>{{years_operating}}</p>
+        </div>
+        <div class="cover-meta-item">
+          <label>Report Date</label>
+          <p>{{report_date}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-bottom">
+      <p>Praxis AI — Operational Intelligence for Australian SMEs</p>
+      <p>© 2026 Praxis AI — All Rights Reserved</p>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 2 — EXECUTIVE SUMMARY
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <!-- Score Strip -->
+  <div class="score-strip">
+    <div class="score-cell">
+      <div class="dim-lbl">Process &amp;<br>Workflow</div>
+      <div class="score-num {{score_process_class}}">{{score_process}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_process_class}}" style="width:{{score_process_pct}}%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="dim-lbl">People &amp;<br>Training</div>
+      <div class="score-num {{score_people_class}}">{{score_people}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_people_class}}" style="width:{{score_people_pct}}%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="dim-lbl">Technology &amp;<br>Automation</div>
+      <div class="score-num {{score_tech_class}}">{{score_tech}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_tech_class}}" style="width:{{score_tech_pct}}%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="dim-lbl">Strategy to<br>Execution</div>
+      <div class="score-num {{score_strategy_class}}">{{score_strategy}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_strategy_class}}" style="width:{{score_strategy_pct}}%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="dim-lbl">Data &amp; Decision<br>Making</div>
+      <div class="score-num {{score_data_class}}">{{score_data}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_data_class}}" style="width:{{score_data_pct}}%"></div></div>
+    </div>
+    <div class="score-cell">
+      <div class="dim-lbl">Scalability</div>
+      <div class="score-num {{score_scalability_class}}">{{score_scalability}}</div>
+      <div class="score-bar-track"><div class="score-bar-fill {{score_scalability_class}}" style="width:{{score_scalability_pct}}%"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <p class="section-label">Overview</p>
+    <h1>Executive Summary</h1>
+
+    <p>{{executive_summary_intro}}</p>
+
+    <div class="callout critical">
+      <div class="callout-label">Critical Finding</div>
+      <p>{{critical_finding}}</p>
+    </div>
+
+    <p>{{executive_summary_body}}</p>
+
+    <h2>Your Priority Gaps</h2>
+    <div class="gap-grid">
+      <div class="gap-card">
+        <div class="gap-num">Priority Gap 1</div>
+        <h3>{{gap1_dimension}}</h3>
+        <p>{{gap1_summary}}</p>
+      </div>
+      <div class="gap-card secondary">
+        <div class="gap-num">Priority Gap 2</div>
+        <h3>{{gap2_dimension}}</h3>
+        <p>{{gap2_summary}}</p>
+      </div>
+    </div>
+
+    <h2>Projected 90-Day Impact</h2>
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="roi-val">{{roi_hours_saved}}</div>
+        <div class="roi-lbl">Hours saved per week through process improvements</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-val">{{roi_cost_saving}}</div>
+        <div class="roi-lbl">Estimated annual cost reduction from efficiency gains</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-val">{{roi_revenue_upside}}</div>
+        <div class="roi-lbl">Revenue upside from improved execution &amp; scalability</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">How to Use This Playbook</div>
+      <p>{{how_to_use}}</p>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 2</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 3 — PHASE 1: DAYS 1–30 (STABILISE)
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <div class="phase-header">
+    <div class="phase-num">01</div>
+    <div class="phase-info">
+      <h2>Phase 1 — Stabilise</h2>
+      <p>Days 1–30 &nbsp;|&nbsp; Foundation, quick wins, and critical gap triage</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>{{phase1_intro}}</p>
+
+    <span class="dim-badge critical">{{gap1_dimension}}</span>
+    <h2>{{gap1_phase1_heading}}</h2>
+    <p>{{gap1_phase1_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap1_phase1_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap1_phase1_watchout}}</p>
+    </div>
+
+    <span class="dim-badge warning">{{gap2_dimension}}</span>
+    <h2>{{gap2_phase1_heading}}</h2>
+    <p>{{gap2_phase1_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap2_phase1_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap2_phase1_watchout}}</p>
+    </div>
+
+    <h2>Phase 1 Completion Checklist</h2>
+    <ul class="checklist">
+      {{#each phase1_checklist}}
+      <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 3</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 4 — PHASE 2: DAYS 31–60 (BUILD)
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <div class="phase-header">
+    <div class="phase-num">02</div>
+    <div class="phase-info">
+      <h2>Phase 2 — Build</h2>
+      <p>Days 31–60 &nbsp;|&nbsp; Systems, processes, and team capability</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>{{phase2_intro}}</p>
+
+    <span class="dim-badge critical">{{gap1_dimension}}</span>
+    <h2>{{gap1_phase2_heading}}</h2>
+    <p>{{gap1_phase2_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap1_phase2_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap1_phase2_watchout}}</p>
+    </div>
+
+    <span class="dim-badge warning">{{gap2_dimension}}</span>
+    <h2>{{gap2_phase2_heading}}</h2>
+    <p>{{gap2_phase2_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap2_phase2_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap2_phase2_watchout}}</p>
+    </div>
+
+    <h2>Phase 2 Completion Checklist</h2>
+    <ul class="checklist">
+      {{#each phase2_checklist}}
+      <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 4</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 5 — PHASE 3: DAYS 61–90 (SCALE)
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <div class="phase-header">
+    <div class="phase-num">03</div>
+    <div class="phase-info">
+      <h2>Phase 3 — Scale</h2>
+      <p>Days 61–90 &nbsp;|&nbsp; Optimise, embed, and prepare for growth</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>{{phase3_intro}}</p>
+
+    <span class="dim-badge critical">{{gap1_dimension}}</span>
+    <h2>{{gap1_phase3_heading}}</h2>
+    <p>{{gap1_phase3_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap1_phase3_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap1_phase3_watchout}}</p>
+    </div>
+
+    <span class="dim-badge warning">{{gap2_dimension}}</span>
+    <h2>{{gap2_phase3_heading}}</h2>
+    <p>{{gap2_phase3_context}}</p>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th style="width:4%">#</th>
+          <th style="width:40%">Action</th>
+          <th style="width:20%">Owner</th>
+          <th style="width:16%">Timeline</th>
+          <th style="width:10%">Priority</th>
+          <th style="width:10%">Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gap2_phase3_actions}}
+        <tr>
+          <td>{{this.number}}</td>
+          <td>{{this.action}}</td>
+          <td>{{this.owner}}</td>
+          <td>{{this.timeline}}</td>
+          <td><span class="p-{{this.priority_class}}">{{this.priority}}</span></td>
+          <td>{{this.effort}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out For</div>
+      <p>{{gap2_phase3_watchout}}</p>
+    </div>
+
+    <h2>Phase 3 Completion Checklist</h2>
+    <ul class="checklist">
+      {{#each phase3_checklist}}
+      <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 5</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 6 — KPI TRACKER & SUCCESS METRICS
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <div class="phase-header">
+    <div class="phase-num">04</div>
+    <div class="phase-info">
+      <h2>KPI Tracker &amp; Success Metrics</h2>
+      <p>Measure what matters — track progress across all three phases</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>{{kpi_intro}}</p>
+
+    <table class="kpi-table">
+      <thead>
+        <tr>
+          <th style="width:24%">Metric</th>
+          <th style="width:18%">Dimension</th>
+          <th style="width:14%">Baseline</th>
+          <th style="width:14%">Day 30</th>
+          <th style="width:14%">Day 60</th>
+          <th style="width:16%">Day 90 Target</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each kpi_rows}}
+        <tr>
+          <td>{{this.metric}}</td>
+          <td>{{this.dimension}}</td>
+          <td>{{this.baseline}}</td>
+          <td>{{this.target_30}}</td>
+          <td>{{this.target_60}}</td>
+          <td><strong>{{this.target_90}}</strong></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-label">Measurement Cadence</div>
+      <p>{{kpi_measurement_cadence}}</p>
+    </div>
+
+    <h2>Leading vs. Lagging Indicators</h2>
+    <p>{{leading_lagging_intro}}</p>
+
+    <div class="gap-grid">
+      <div class="gap-card tertiary">
+        <div class="gap-num">Leading Indicators — Activity</div>
+        <h3>What You Do</h3>
+        <ul>
+          {{#each leading_indicators}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      <div class="gap-card secondary">
+        <div class="gap-num">Lagging Indicators — Outcomes</div>
+        <h3>What You Achieve</h3>
+        <ul>
+          {{#each lagging_indicators}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 6</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE 7 — RESOURCES, TOOLS & NEXT STEPS
+════════════════════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">{{business_name}} &nbsp;|&nbsp; {{industry}}<br>{{report_date}}</div>
+  </div>
+
+  <div class="phase-header">
+    <div class="phase-num">05</div>
+    <div class="phase-info">
+      <h2>Resources, Tools &amp; Next Steps</h2>
+      <p>Recommended tools, common pitfalls, and how to continue your improvement journey</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <h2>Recommended Tools &amp; Resources</h2>
+    <p>{{tools_intro}}</p>
+
+    <table class="tools-table">
+      <thead>
+        <tr>
+          <th style="width:22%">Tool / Resource</th>
+          <th style="width:18%">Dimension</th>
+          <th style="width:42%">Purpose</th>
+          <th style="width:18%">Est. Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each recommended_tools}}
+        <tr>
+          <td><strong>{{this.name}}</strong></td>
+          <td>{{this.dimension}}</td>
+          <td>{{this.purpose}}</td>
+          <td>{{this.cost}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <h2>Common Implementation Pitfalls</h2>
+    <p>{{pitfalls_intro}}</p>
+
+    <div class="callout critical">
+      <div class="callout-label">Pitfall 1 — {{pitfall1_title}}</div>
+      <p>{{pitfall1_description}}</p>
+    </div>
+    <div class="callout warning">
+      <div class="callout-label">Pitfall 2 — {{pitfall2_title}}</div>
+      <p>{{pitfall2_description}}</p>
+    </div>
+    <div class="callout">
+      <div class="callout-label">Pitfall 3 — {{pitfall3_title}}</div>
+      <p>{{pitfall3_description}}</p>
+    </div>
+
+    <h2>Your Next Steps with Praxis AI</h2>
+    <p>{{closing_note}}</p>
+
+  </div>
+
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p>Page 7</p>
+  </div>
+</div>
+
+
+</body>
+</html>

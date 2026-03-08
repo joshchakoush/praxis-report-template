@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Praxis AI — Your Recommended Solutions</title>
+  <style>
+    /* ─── Base & Tokens ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #1a1a2e;
+      --teal:        #4bb4a5;
+      --teal-light:  #e8f7f5;
+      --teal-mid:    #2a8a7d;
+      --red:         #c0392b;
+      --amber:       #d4820a;
+      --amber-light: #fdf3e3;
+      --body:        #2d2d2d;
+      --muted:       #6b7280;
+      --border:      #e5e7eb;
+      --bg-light:    #f9fafb;
+      --white:       #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 10.5pt;
+      color: var(--body);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ─── Page Wrapper ──────────────────────────────────────────────── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Page Header ───────────────────────────────────────────────── */
+    .page-header {
+      background: var(--navy);
+      padding: 11px 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .page-header .brand {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 8.5pt;
+      font-weight: bold;
+      color: var(--teal);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .page-header .doc-meta {
+      font-size: 8pt;
+      color: rgba(255,255,255,0.45);
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    /* ─── Main Content ──────────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      padding: 36px 44px 28px;
+    }
+
+    /* ─── Section Label ─────────────────────────────────────────────── */
+    .section-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+
+    /* ─── Page Title ────────────────────────────────────────────────── */
+    .page-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22pt;
+      font-weight: bold;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 10pt;
+      color: var(--muted);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ─── Intro Callout ─────────────────────────────────────────────── */
+    .intro-callout {
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .intro-callout p {
+      font-size: 10pt;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.65;
+      margin: 0;
+    }
+    .intro-callout strong {
+      color: var(--teal);
+    }
+
+    /* ─── Priority Gap Chips ────────────────────────────────────────── */
+    .gap-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .gap-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .gap-chip.critical {
+      background: #fdf2f2;
+      color: var(--red);
+      border: 1px solid #f5c6c6;
+    }
+    .gap-chip.warning {
+      background: var(--amber-light);
+      color: var(--amber);
+      border: 1px solid #f5d9a0;
+    }
+    .gap-chip .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ─── Product Cards ─────────────────────────────────────────────── */
+    .products-heading {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 13pt;
+      color: var(--navy);
+      margin-bottom: 14px;
+    }
+
+    /* Tier 1A — Playbook (featured, full-width) */
+    .product-featured {
+      border: 2px solid var(--teal);
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      position: relative;
+      background: var(--white);
+    }
+    .product-featured .badge-featured {
+      position: absolute;
+      top: -1px;
+      right: 20px;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 7pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 0 0 6px 6px;
+    }
+    .product-featured .product-inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .product-featured .product-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--teal-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+    .product-featured .product-body {
+      flex: 1;
+    }
+    .product-featured .product-tier {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 3px;
+    }
+    .product-featured .product-name {
+      font-family: Georgia, serif;
+      font-size: 13pt;
+      font-weight: bold;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .product-featured .product-desc {
+      font-size: 9.5pt;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.55;
+    }
+    .product-featured .product-bullets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      margin-bottom: 14px;
+    }
+    .product-featured .product-bullets span {
+      font-size: 8.5pt;
+      color: var(--body);
+    }
+    .product-featured .product-bullets span::before {
+      content: "✓ ";
+      color: var(--teal);
+      font-weight: 700;
+    }
+    .product-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn-primary {
+      display: inline-block;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 9.5pt;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--teal-mid); }
+    .price-tag {
+      font-family: Georgia, serif;
+      font-size: 15pt;
+      font-weight: bold;
+      color: var(--navy);
+    }
+    .price-tag span {
+      font-size: 9pt;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    /* Tier 1B — Bolt-On Grid */
+    .bolton-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .bolton-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      border-top: 3px solid var(--teal);
+      background: var(--white);
+    }
+    .bolton-card.critical { border-top-color: var(--red); }
+    .bolton-card.warning  { border-top-color: var(--amber); }
+
+    .bolton-card .bolton-dim {
+      font-size: 7pt;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    .bolton-card .bolton-name {
+      font-family: Georgia, serif;
+      font-size: 10.5pt;
+      font-weight: bold;
+      color: var(--navy);
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    .bolton-card .bolton-desc {
+      font-size: 8.5pt;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .bolton-cta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-secondary {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .bolton-price {
+      font-family: Georgia, serif;
+      font-size: 11pt;
+      font-weight: bold;
+      color: var(--navy);
+    }
+
+    /* Bundle offer bar */
+    .bundle-bar {
+      background: var(--amber-light);
+      border: 1px solid #f5d9a0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .bundle-bar .bundle-text {
+      font-size: 9pt;
+      color: var(--body);
+    }
+    .bundle-bar .bundle-text strong {
+      color: var(--amber);
+    }
+    .btn-bundle {
+      display: inline-block;
+      background: var(--amber);
+      color: var(--white);
+      font-size: 8.5pt;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Page Footer ───────────────────────────────────────────────── */
+    .page-footer {
+      padding: 12px 44px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .page-footer p {
+      font-size: 7.5pt;
+      color: var(--muted);
+      margin: 0;
+    }
+    .page-footer .page-num {
+      font-size: 7.5pt;
+      color: var(--muted);
+    }
+
+    /* ─── Print ─────────────────────────────────────────────────────── */
+    @media print {
+      .page { margin: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <span class="brand">Praxis AI</span>
+    <div class="doc-meta">
+      {{business_name}} &nbsp;|&nbsp; {{industry}}<br>
+      {{report_date}}
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+
+    <p class="section-label">Your Personalised Solutions</p>
+    <h1 class="page-title">Recommended Next Steps</h1>
+    <p class="page-subtitle">
+      Based on your diagnostic results, the products below are personalised to address the specific gaps identified in your business. Each is generated from your diagnostic data and delivered instantly after purchase.
+    </p>
+
+    <!-- Intro Callout -->
+    <div class="intro-callout">
+      <p>
+        Your diagnostic identified <strong>{{gap_count}} priority gaps</strong> across your operations. The products below are built specifically around those gaps — not generic templates. Every document is generated using your business name, industry, staff count, and the exact findings from this report.
+      </p>
+    </div>
+
+    <!-- Priority Gap Chips -->
+    <div class="gap-chips">
+      {{#if show_gap_process}}
+      <span class="gap-chip critical"><span class="dot"></span>Process &amp; Workflow — Score {{score_process}}/10</span>
+      {{/if}}
+      {{#if show_gap_people}}
+      <span class="gap-chip critical"><span class="dot"></span>People &amp; Training — Score {{score_people}}/10</span>
+      {{/if}}
+      {{#if show_gap_tech}}
+      <span class="gap-chip warning"><span class="dot"></span>Technology &amp; Automation — Score {{score_tech}}/10</span>
+      {{/if}}
+      {{#if show_gap_strategy}}
+      <span class="gap-chip critical"><span class="dot"></span>Strategy to Execution — Score {{score_strategy}}/10</span>
+      {{/if}}
+      {{#if show_gap_data}}
+      <span class="gap-chip critical"><span class="dot"></span>Data &amp; Decision Making — Score {{score_data}}/10</span>
+      {{/if}}
+      {{#if show_gap_scalability}}
+      <span class="gap-chip critical"><span class="dot"></span>Scalability — Score {{score_scalability}}/10</span>
+      {{/if}}
+    </div>
+
+    <!-- ── TIER 1A: OPERATIONAL PLAYBOOK ─────────────────────────── -->
+    <h2 class="products-heading">Your Complete 90-Day Roadmap</h2>
+
+    <div class="product-featured">
+      <div class="badge-featured">Most Popular</div>
+      <div class="product-inner">
+        <div class="product-icon">📋</div>
+        <div class="product-body">
+          <p class="product-tier">Tier 1A — Personalised Operational Playbook</p>
+          <h3 class="product-name">{{business_name}} 90-Day Operational Improvement Roadmap</h3>
+          <p class="product-desc">
+            A fully personalised, ready-to-implement action plan covering every critical gap identified in your diagnostic. Structured across three 30-day phases — Stabilise, Build, and Scale — with specific tasks, owners, timelines, KPI targets, and recommended tools tailored to your industry and team size.
+          </p>
+          <div class="product-bullets">
+            <span>Covers all {{gap_count}} priority gaps</span>
+            <span>3-phase 90-day action plan</span>
+            <span>KPI tracker &amp; success metrics</span>
+            <span>Industry-specific recommendations</span>
+            <span>Delivered as branded PDF instantly</span>
+          </div>
+          <div class="product-cta-row">
+            <a href="https://buy.stripe.com/PLACEHOLDER_PLAYBOOK" class="btn-primary">Get Your Playbook — $197 AUD →</a>
+            <div class="price-tag">$197 <span>AUD &nbsp;|&nbsp; Instant delivery</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIER 1B: BOLT-ON TOOLKITS ─────────────────────────────── -->
+    <h2 class="products-heading">Dimension-Specific Bolt-On Toolkits</h2>
+
+    <!-- Bundle offer bar (shown when 2+ gaps) -->
+    <div class="bundle-bar">
+      <p class="bundle-text">
+        <strong>Bundle offer:</strong> Pick any two bolt-on toolkits for <strong>$167 AUD</strong> — saving $27 vs. buying separately.
+      </p>
+      <a href="https://buy.stripe.com/PLACEHOLDER_BUNDLE" class="btn-bundle">Get the Bundle — $167 AUD →</a>
+    </div>
+
+    <!-- Bolt-on cards — only the relevant gaps are shown -->
+    <div class="bolton-grid">
+
+      {{#if show_gap_process}}
+      <div class="bolton-card critical">
+        <p class="bolton-dim">Dimension 1 — Process &amp; Workflow</p>
+        <h4 class="bolton-name">Process Audit &amp; Redesign Map</h4>
+        <p class="bolton-desc">
+          A step-by-step audit framework and redesign template for your core workflows. Includes a process mapping canvas, bottleneck identification guide, and a prioritised redesign plan specific to {{industry}}.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_PROCESS" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if show_gap_people}}
+      <div class="bolton-card critical">
+        <p class="bolton-dim">Dimension 2 — People &amp; Training</p>
+        <h4 class="bolton-name">Staff Onboarding &amp; Training Framework</h4>
+        <p class="bolton-desc">
+          A complete onboarding system including role description templates, a 90-day new-starter plan, a training checklist, and a performance feedback structure — all tailored to a {{staff_count}}-person {{industry}} business.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_PEOPLE" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if show_gap_tech}}
+      <div class="bolton-card warning">
+        <p class="bolton-dim">Dimension 3 — Technology &amp; Automation</p>
+        <h4 class="bolton-name">Technology Roadmap &amp; Tool Stack</h4>
+        <p class="bolton-desc">
+          A prioritised technology improvement plan identifying the right tools for your business, integration opportunities, and a 90-day implementation sequence to eliminate manual work — built for {{industry}}.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_TECH" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if show_gap_strategy}}
+      <div class="bolton-card critical">
+        <p class="bolton-dim">Dimension 4 — Strategy to Execution</p>
+        <h4 class="bolton-name">90-Day Execution Planner</h4>
+        <p class="bolton-desc">
+          A structured strategic execution framework with quarterly priorities, a weekly review cadence, a decision-making filter, and accountability mechanisms — personalised to {{business_name}}'s current stage and revenue band.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_STRATEGY" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if show_gap_data}}
+      <div class="bolton-card critical">
+        <p class="bolton-dim">Dimension 5 — Data &amp; Decision Making</p>
+        <h4 class="bolton-name">KPI &amp; Reporting Dashboard Template</h4>
+        <p class="bolton-desc">
+          A ready-to-use KPI framework and reporting dashboard template with the key metrics for a {{industry}} business at your revenue level. Includes a measurement guide and a weekly reporting cadence.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_DATA" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if show_gap_scalability}}
+      <div class="bolton-card critical">
+        <p class="bolton-dim">Dimension 6 — Scalability</p>
+        <h4 class="bolton-name">Scalability Readiness Report &amp; Action Plan</h4>
+        <p class="bolton-desc">
+          A detailed scalability assessment covering systems, team structure, financial capacity, and market readiness — with a prioritised action plan to prepare {{business_name}} for the next stage of growth.
+        </p>
+        <div class="bolton-cta-row">
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_SCALABILITY" class="btn-secondary">Get This Toolkit →</a>
+          <span class="bolton-price">$97 AUD</span>
+        </div>
+      </div>
+      {{/if}}
+
+    </div>
+    <!-- end bolton-grid -->
+
+  </div>
+  <!-- end content -->
+
+  <!-- Page Footer -->
+  <div class="page-footer">
+    <p>Directional indicators only. Not professional advice. © 2026 Praxis AI.</p>
+    <p class="page-num">Page 9 of 9</p>
+  </div>
+
+</div>
+</body>
+</html>
