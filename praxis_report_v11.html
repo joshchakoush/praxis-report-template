@@ -724,8 +724,7 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
       <div class="upsell-playbook-hero">
         <div class="upsell-hero-left">
           <div class="upsell-hero-name">Operational Playbook — All 6 Dimensions</div>
-          <div class="upsell-hero-desc">Your complete 22-page operational improvement guide built from your diagnostic results. Covers all six business dimensions with gap analysis, 24 prioritised recommendations, implementation plans, KPI trackers, 7-day quick win checklists, and a cross-dimension 90-day action roadmap.</div>
-          <div class="upsell-hero-bullets">
+          <div class="upsell-hero-bullets" style="margin-top:4px;">
             <div class="upsell-hero-bullet">Gap analysis across all 6 dimensions</div>
             <div class="upsell-hero-bullet">KPI trackers &amp; 12-month benchmarks</div>
             <div class="upsell-hero-bullet">24 recommendations with implementation plans</div>
@@ -749,14 +748,22 @@ body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);f
         <div class="upsell-card">
           <div class="upsell-card-score">SCORE: {{4.upsell_1_score}} — IMMEDIATE ATTENTION REQUIRED</div>
           <div class="upsell-card-title">{{4.upsell_1_title}}</div>
-          <div class="upsell-card-desc">{{4.upsell_1_desc}}</div>
+          <div class="upsell-hero-bullets" style="margin-bottom:8px;">
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_1}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_2}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_3}}</div>
+          </div>
           <div class="upsell-price"><div class="upsell-price-num">$100</div><div class="upsell-price-label">&nbsp;AUD one-time</div></div>
           <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_1" class="upsell-btn" style="background:var(--navy,#1a1a2e);border:1px solid var(--teal);color:#ffffff;width:100%;text-align:center;display:block;">Get This Toolkit &rarr;</a>
         </div>
         <div class="upsell-card">
           <div class="upsell-card-score">SCORE: {{4.upsell_2_score}} — IMMEDIATE ATTENTION REQUIRED</div>
           <div class="upsell-card-title">{{4.upsell_2_title}}</div>
-          <div class="upsell-card-desc">{{4.upsell_2_desc}}</div>
+          <div class="upsell-hero-bullets" style="margin-bottom:8px;">
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_1}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_2}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_3}}</div>
+          </div>
           <div class="upsell-price"><div class="upsell-price-num">$100</div><div class="upsell-price-label">&nbsp;AUD one-time</div></div>
           <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_2" class="upsell-btn" style="background:var(--navy,#1a1a2e);border:1px solid var(--teal);color:#ffffff;width:100%;text-align:center;display:block;">Get This Toolkit &rarr;</a>
         </div>
