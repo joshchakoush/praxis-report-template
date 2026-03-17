@@ -1,0 +1,224 @@
+{
+  "name": "Praxis AI — Tier 1A Playbook Delivery (v3 — 22-Page)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "REPLACE_WITH_YOUR_STRIPE_WEBHOOK_HOOK_ID",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "data": { "editable": "true" },
+              "label": "Praxis-Stripe-Tier1A-inbound"
+            }
+          }
+        },
+        "parameters": [
+          { "name": "hook", "type": "hook:gateway-webhook", "label": "Webhook", "required": true },
+          { "name": "maxResults", "type": "number", "label": "Maximum number of results" }
+        ],
+        "notes": "Listens for Stripe 'checkout.session.completed' events. Create a Custom Webhook in Make.com named 'Praxis-Stripe-Tier1A-inbound', copy its ID here, then point your Stripe webhook to the generated URL."
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariable2",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "name": "customer_email",
+        "scope": "roundtrip",
+        "value": "{{1.data.object.customer_details.email}}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {
+          "expect": { "scope": { "label": "One cycle" } }
+        },
+        "expect": [
+          { "name": "name", "type": "text", "label": "Variable name", "required": true },
+          { "name": "scope", "type": "select", "label": "Variable lifetime", "required": true },
+          { "name": "value", "type": "any", "label": "Variable value" }
+        ],
+        "interface": [
+          { "name": "customer_email", "type": "any", "label": "customer_email" }
+        ],
+        "notes": "Extracts the customer's email from the Stripe webhook payload and stores it as a variable for use in the Google Sheets lookup."
+      }
+    },
+    {
+      "id": 3,
+      "module": "google-sheets:searchRows",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CONNECTION_ID"
+      },
+      "mapper": {
+        "spreadsheetId": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID",
+        "sheetId": "Diagnostic Results",
+        "filter": {
+          "conditions": [
+            {
+              "a": "{{1.email}}",
+              "b": "{{2.customer_email}}",
+              "o": "text:equal"
+            }
+          ],
+          "operator": "AND"
+        },
+        "limit": 1
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "notes": "Looks up the client's full diagnostic data from your Google Sheet using their email. REQUIRED COLUMNS: email, business_name, industry, revenue_band, staff_count, dim1_score, dim2_score, dim3_score, dim4_score, dim5_score, dim6_score, d1_finding, d1_callout, d1_roi, d2_finding, d2_callout, d2_roi, d3_finding, d3_callout, d3_roi, d4_finding, d4_callout, d4_roi, d5_finding, d5_callout, d5_roi, d6_finding, d6_callout, d6_roi. These findings columns are populated by your Tally→Make.com diagnostic pipeline."
+      }
+    },
+    {
+      "id": 4,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth",
+        "tlsType": "",
+        "proxyKeychain": ""
+      },
+      "mapper": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "post",
+        "headers": [
+          { "name": "x-api-key", "value": "REPLACE_WITH_YOUR_ANTHROPIC_API_KEY" },
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "content-type", "value": "application/json" }
+        ],
+        "contentType": "json",
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "300",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\"model\":\"claude-opus-4-5\",\"max_tokens\":16000,\"temperature\":0.2,\"system\":\"REPLACE_WITH_FULL_CONTENT_OF_claude-prompt-operational-playbook-v2.md\",\"messages\":[{\"role\":\"user\",\"content\":\"{\\\"business_name\\\":\\\"{{3.business_name}}\\\",\\\"industry\\\":\\\"{{3.industry}}\\\",\\\"revenue_band\\\":\\\"{{3.revenue_band}}\\\",\\\"staff_count\\\":{{3.staff_count}},\\\"report_date\\\":\\\"{{formatDate(now; \\\\\\\"D MMMM YYYY\\\\\\\")}}\\\",\\\"scores\\\":{\\\"process\\\":{{3.dim1_score}},\\\"people\\\":{{3.dim2_score}},\\\"tech\\\":{{3.dim3_score}},\\\"strategy\\\":{{3.dim4_score}},\\\"data\\\":{{3.dim5_score}},\\\"scalability\\\":{{3.dim6_score}}},\\\"findings\\\":[{\\\"dimension\\\":\\\"Process & Workflow\\\",\\\"finding_text\\\":\\\"{{3.d1_finding}}\\\",\\\"callout\\\":\\\"{{3.d1_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d1_roi}}\\\"},{\\\"dimension\\\":\\\"People & Training\\\",\\\"finding_text\\\":\\\"{{3.d2_finding}}\\\",\\\"callout\\\":\\\"{{3.d2_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d2_roi}}\\\"},{\\\"dimension\\\":\\\"Technology & Automation\\\",\\\"finding_text\\\":\\\"{{3.d3_finding}}\\\",\\\"callout\\\":\\\"{{3.d3_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d3_roi}}\\\"},{\\\"dimension\\\":\\\"Strategy to Execution\\\",\\\"finding_text\\\":\\\"{{3.d4_finding}}\\\",\\\"callout\\\":\\\"{{3.d4_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d4_roi}}\\\"},{\\\"dimension\\\":\\\"Data & Decision Making\\\",\\\"finding_text\\\":\\\"{{3.d5_finding}}\\\",\\\"callout\\\":\\\"{{3.d5_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d5_roi}}\\\"},{\\\"dimension\\\":\\\"Scalability\\\",\\\"finding_text\\\":\\\"{{3.d6_finding}}\\\",\\\"callout\\\":\\\"{{3.d6_callout}}\\\",\\\"roi_impact\\\":\\\"{{3.d6_roi}}\\\"}]}\"}]}"
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "notes": "Calls Claude with the v2 system prompt. The user message passes all 6 dimension scores AND the findings/callouts/ROI data for all 6 dimensions from the Google Sheet. Claude returns a single large JSON object with all content needed to populate the 22-page v3 Playbook template. IMPORTANT: Replace the system prompt placeholder with the full text of claude-prompt-operational-playbook-v2.md from GitHub. The model is set to claude-opus-4-5 with max_tokens 16000 to handle the large output. Temperature is 0.2 for consistent, reliable output."
+      }
+    },
+    {
+      "id": 5,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{4.data.content[].text}}"
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 },
+        "notes": "Parses the raw JSON string returned by Claude into a structured object. IMPORTANT: After importing this blueprint and running it once with a test payload, click 'Re-determine data structure' on this module so Make.com can map all the fields from the new v2 schema. The new schema is much larger than the previous version — it contains all 22 pages of content."
+      }
+    },
+    {
+      "id": 6,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth",
+        "tlsType": "",
+        "proxyKeychain": ""
+      },
+      "mapper": {
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "method": "post",
+        "headers": [
+          { "name": "Authorization", "value": "Basic {{base64(\"api:REPLACE_WITH_YOUR_PDFSHIFT_API_KEY\")}}" }
+        ],
+        "contentType": "json",
+        "parseResponse": false,
+        "stopOnHttpError": true,
+        "timeout": "300",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\"source\":\"https://joshchakoush.github.io/praxis-report-template/templates/operational-playbook-template.html\",\"variables\":{\"business_name\":\"{{5.business_name}}\",\"industry\":\"{{5.industry}}\",\"revenue_range\":\"{{5.revenue_band}}\",\"team_size\":\"{{5.staff_count}}\",\"report_date\":\"{{5.report_date}}\",\"report_year\":\"{{formatDate(now; \\\"YYYY\\\")}}\",\"overall_score\":\"{{5.overall_score}}\",\"overall_maturity_label\":\"{{5.overall_maturity_stage}}\",\"exec_summary\":\"{{5.executive_summary.at_a_glance_intro}}\",\"overall_maturity_interpretation\":\"{{5.executive_summary.maturity_interp}}\",\"d1_score\":\"{{5.dimensions[].score}}\",\"d1_score_class\":\"{{5.dimensions[].score_class}}\",\"d1_maturity\":\"{{5.dimensions[].maturity_text}}\",\"d1_score_context\":\"{{5.dimensions[].maturity_text}}\",\"d1_bar_pct\":\"{{5.dimensions[].score_pct}}\",\"d1_bar_class\":\"bar-{{5.dimensions[].score_class}}\",\"d1_tag_class\":\"tag-{{5.dimensions[].score_class}}\",\"d1_roi_time\":\"{{5.dimensions[].roi_potential.time_saving}}\",\"d1_roi_time_desc\":\"Estimated weekly time saving\",\"d1_roi_cost\":\"{{5.dimensions[].roi_potential.cost_reduction}}\",\"d1_roi_cost_desc\":\"Potential cost reduction\",\"d1_roi_revenue\":\"{{5.dimensions[].roi_potential.revenue_impact}}\",\"d1_roi_revenue_desc\":\"Revenue impact potential\",\"d1_gap1_area\":\"{{5.dimensions[].gaps[1].area}}\",\"d1_gap1_state\":\"{{5.dimensions[].gaps[1].current_state}}\",\"d1_gap1_severity\":\"{{5.dimensions[].gaps[1].severity}}\",\"d1_gap1_sev_class\":\"sev-{{lower(5.dimensions[].gaps[1].severity)}}\",\"d1_gap1_impact\":\"{{5.dimensions[].gaps[1].business_impact}}\",\"d1_gap2_area\":\"{{5.dimensions[].gaps[2].area}}\",\"d1_gap2_state\":\"{{5.dimensions[].gaps[2].current_state}}\",\"d1_gap2_severity\":\"{{5.dimensions[].gaps[2].severity}}\",\"d1_gap2_sev_class\":\"sev-{{lower(5.dimensions[].gaps[2].severity)}}\",\"d1_gap2_impact\":\"{{5.dimensions[].gaps[2].business_impact}}\",\"d1_gap3_area\":\"{{5.dimensions[].gaps[3].area}}\",\"d1_gap3_state\":\"{{5.dimensions[].gaps[3].current_state}}\",\"d1_gap3_severity\":\"{{5.dimensions[].gaps[3].severity}}\",\"d1_gap3_sev_class\":\"sev-{{lower(5.dimensions[].gaps[3].severity)}}\",\"d1_gap3_impact\":\"{{5.dimensions[].gaps[3].business_impact}}\",\"d1_gap4_area\":\"{{5.dimensions[].gaps[4].area}}\",\"d1_gap4_state\":\"{{5.dimensions[].gaps[4].current_state}}\",\"d1_gap4_severity\":\"{{5.dimensions[].gaps[4].severity}}\",\"d1_gap4_sev_class\":\"sev-{{lower(5.dimensions[].gaps[4].severity)}}\",\"d1_gap4_impact\":\"{{5.dimensions[].gaps[4].business_impact}}\",\"d1_key_insight\":\"{{5.dimensions[].key_insight}}\",\"d1_qw1\":\"{{5.dimensions[].quick_wins[1]}}\",\"d1_qw2\":\"{{5.dimensions[].quick_wins[2]}}\",\"d1_qw3\":\"{{5.dimensions[].quick_wins[3]}}\",\"d1_qw4\":\"{{5.dimensions[].quick_wins[4]}}\",\"d1_qw5\":\"{{5.dimensions[].quick_wins[5]}}\",\"d1_rec1_title\":\"{{5.dimensions[].recommendations[1].title}}\",\"d1_rec1_body\":\"{{5.dimensions[].recommendations[1].description}}\",\"d1_rec1_step1\":\"{{5.dimensions[].recommendations[1].actions[1]}}\",\"d1_rec1_step2\":\"{{5.dimensions[].recommendations[1].actions[2]}}\",\"d1_rec1_step3\":\"{{5.dimensions[].recommendations[1].actions[3]}}\",\"d1_rec1_effort\":\"{{5.dimensions[].recommendations[1].effort}}\",\"d1_rec1_effort_class\":\"effort-{{lower(replace(5.dimensions[].recommendations[1].effort; \\\" \\\"; \\\"-\\\"))}}\",\"d1_rec1_timeline\":\"{{5.dimensions[].recommendations[1].timeline}}\",\"d1_rec2_title\":\"{{5.dimensions[].recommendations[2].title}}\",\"d1_rec2_body\":\"{{5.dimensions[].recommendations[2].description}}\",\"d1_rec2_step1\":\"{{5.dimensions[].recommendations[2].actions[1]}}\",\"d1_rec2_step2\":\"{{5.dimensions[].recommendations[2].actions[2]}}\",\"d1_rec2_step3\":\"{{5.dimensions[].recommendations[2].actions[3]}}\",\"d1_rec2_effort\":\"{{5.dimensions[].recommendations[2].effort}}\",\"d1_rec2_effort_class\":\"effort-{{lower(replace(5.dimensions[].recommendations[2].effort; \\\" \\\"; \\\"-\\\"))}}\",\"d1_rec2_timeline\":\"{{5.dimensions[].recommendations[2].timeline}}\",\"d1_rec3_title\":\"{{5.dimensions[].recommendations[3].title}}\",\"d1_rec3_body\":\"{{5.dimensions[].recommendations[3].description}}\",\"d1_rec3_step1\":\"{{5.dimensions[].recommendations[3].actions[1]}}\",\"d1_rec3_step2\":\"{{5.dimensions[].recommendations[3].actions[2]}}\",\"d1_rec3_step3\":\"{{5.dimensions[].recommendations[3].actions[3]}}\",\"d1_rec3_effort\":\"{{5.dimensions[].recommendations[3].effort}}\",\"d1_rec3_effort_class\":\"effort-{{lower(replace(5.dimensions[].recommendations[3].effort; \\\" \\\"; \\\"-\\\"))}}\",\"d1_rec3_timeline\":\"{{5.dimensions[].recommendations[3].timeline}}\",\"d1_rec4_title\":\"{{5.dimensions[].recommendations[4].title}}\",\"d1_rec4_body\":\"{{5.dimensions[].recommendations[4].description}}\",\"d1_rec4_step1\":\"{{5.dimensions[].recommendations[4].actions[1]}}\",\"d1_rec4_step2\":\"{{5.dimensions[].recommendations[4].actions[2]}}\",\"d1_rec4_step3\":\"{{5.dimensions[].recommendations[4].actions[3]}}\",\"d1_rec4_effort\":\"{{5.dimensions[].recommendations[4].effort}}\",\"d1_rec4_effort_class\":\"effort-{{lower(replace(5.dimensions[].recommendations[4].effort; \\\" \\\"; \\\"-\\\"))}}\",\"d1_rec4_timeline\":\"{{5.dimensions[].recommendations[4].timeline}}\",\"d1_impl1_title\":\"{{5.dimensions[].implementation_plan[1].action}}\",\"d1_impl1_body\":\"{{5.dimensions[].implementation_plan[1].action}}\",\"d1_impl1_week\":\"{{5.dimensions[].implementation_plan[1].timeline}}\",\"d1_impl1_owner\":\"{{5.dimensions[].implementation_plan[1].owner}}\",\"d1_impl1_measure\":\"{{5.dimensions[].implementation_plan[1].success_measure}}\",\"d1_impl2_title\":\"{{5.dimensions[].implementation_plan[2].action}}\",\"d1_impl2_body\":\"{{5.dimensions[].implementation_plan[2].action}}\",\"d1_impl2_week\":\"{{5.dimensions[].implementation_plan[2].timeline}}\",\"d1_impl2_owner\":\"{{5.dimensions[].implementation_plan[2].owner}}\",\"d1_impl2_measure\":\"{{5.dimensions[].implementation_plan[2].success_measure}}\",\"d1_impl3_title\":\"{{5.dimensions[].implementation_plan[3].action}}\",\"d1_impl3_body\":\"{{5.dimensions[].implementation_plan[3].action}}\",\"d1_impl3_week\":\"{{5.dimensions[].implementation_plan[3].timeline}}\",\"d1_impl3_owner\":\"{{5.dimensions[].implementation_plan[3].owner}}\",\"d1_impl3_measure\":\"{{5.dimensions[].implementation_plan[3].success_measure}}\",\"d1_impl4_title\":\"{{5.dimensions[].implementation_plan[4].action}}\",\"d1_impl4_body\":\"{{5.dimensions[].implementation_plan[4].action}}\",\"d1_impl4_week\":\"{{5.dimensions[].implementation_plan[4].timeline}}\",\"d1_impl4_owner\":\"{{5.dimensions[].implementation_plan[4].owner}}\",\"d1_impl4_measure\":\"{{5.dimensions[].implementation_plan[4].success_measure}}\",\"d1_kpi1_name\":\"{{5.dimensions[].kpis[1].kpi}}\",\"d1_kpi1_current\":\"{{5.dimensions[].kpis[1].current}}\",\"d1_kpi1_target\":\"{{5.dimensions[].kpis[1].target}}\",\"d1_kpi1_freq\":\"{{5.dimensions[].kpis[1].review_frequency}}\",\"d1_kpi2_name\":\"{{5.dimensions[].kpis[2].kpi}}\",\"d1_kpi2_current\":\"{{5.dimensions[].kpis[2].current}}\",\"d1_kpi2_target\":\"{{5.dimensions[].kpis[2].target}}\",\"d1_kpi2_freq\":\"{{5.dimensions[].kpis[2].review_frequency}}\",\"d1_kpi3_name\":\"{{5.dimensions[].kpis[3].kpi}}\",\"d1_kpi3_current\":\"{{5.dimensions[].kpis[3].current}}\",\"d1_kpi3_target\":\"{{5.dimensions[].kpis[3].target}}\",\"d1_kpi3_freq\":\"{{5.dimensions[].kpis[3].review_frequency}}\",\"d1_mistake1\":\"{{5.dimensions[].common_mistakes_to_avoid[1]}}\",\"d1_mistake2\":\"{{5.dimensions[].common_mistakes_to_avoid[2]}}\",\"d1_mistake3\":\"{{5.dimensions[].common_mistakes_to_avoid[3]}}\",\"d1_mistake4\":\"{{5.dimensions[].common_mistakes_to_avoid[4]}}\",\"d1_benchmark1\":\"{{5.dimensions[].where_you_should_be_in_12_months[1]}}\",\"d1_benchmark2\":\"{{5.dimensions[].where_you_should_be_in_12_months[2]}}\",\"d1_benchmark3\":\"{{5.dimensions[].where_you_should_be_in_12_months[3]}}\",\"plan1_title\":\"{{5.roadmap_90_day[1].action}}\",\"plan1_body\":\"{{5.roadmap_90_day[1].action}}\",\"plan1_phase\":\"{{5.roadmap_90_day[1].phase}}\",\"plan1_dimension\":\"{{5.roadmap_90_day[1].dimension}}\",\"plan1_owner\":\"{{5.roadmap_90_day[1].owner}}\",\"plan1_outcome\":\"{{5.roadmap_90_day[1].expected_outcome}}\",\"plan2_title\":\"{{5.roadmap_90_day[2].action}}\",\"plan2_body\":\"{{5.roadmap_90_day[2].action}}\",\"plan2_phase\":\"{{5.roadmap_90_day[2].phase}}\",\"plan2_dimension\":\"{{5.roadmap_90_day[2].dimension}}\",\"plan2_owner\":\"{{5.roadmap_90_day[2].owner}}\",\"plan2_outcome\":\"{{5.roadmap_90_day[2].expected_outcome}}\",\"plan3_title\":\"{{5.roadmap_90_day[3].action}}\",\"plan3_body\":\"{{5.roadmap_90_day[3].action}}\",\"plan3_phase\":\"{{5.roadmap_90_day[3].phase}}\",\"plan3_dimension\":\"{{5.roadmap_90_day[3].dimension}}\",\"plan3_owner\":\"{{5.roadmap_90_day[3].owner}}\",\"plan3_outcome\":\"{{5.roadmap_90_day[3].expected_outcome}}\",\"plan4_title\":\"{{5.roadmap_90_day[4].action}}\",\"plan4_body\":\"{{5.roadmap_90_day[4].action}}\",\"plan4_phase\":\"{{5.roadmap_90_day[4].phase}}\",\"plan4_dimension\":\"{{5.roadmap_90_day[4].dimension}}\",\"plan4_owner\":\"{{5.roadmap_90_day[4].owner}}\",\"plan4_outcome\":\"{{5.roadmap_90_day[4].expected_outcome}}\",\"plan5_title\":\"{{5.roadmap_90_day[5].action}}\",\"plan5_body\":\"{{5.roadmap_90_day[5].action}}\",\"plan5_phase\":\"{{5.roadmap_90_day[5].phase}}\",\"plan5_dimension\":\"{{5.roadmap_90_day[5].dimension}}\",\"plan5_owner\":\"{{5.roadmap_90_day[5].owner}}\",\"plan5_outcome\":\"{{5.roadmap_90_day[5].expected_outcome}}\",\"plan6_title\":\"{{5.roadmap_90_day[6].action}}\",\"plan6_body\":\"{{5.roadmap_90_day[6].action}}\",\"plan6_phase\":\"{{5.roadmap_90_day[6].phase}}\",\"plan6_dimension\":\"{{5.roadmap_90_day[6].dimension}}\",\"plan6_owner\":\"{{5.roadmap_90_day[6].owner}}\",\"plan6_outcome\":\"{{5.roadmap_90_day[6].expected_outcome}}\",\"plan7_title\":\"{{5.roadmap_90_day[7].action}}\",\"plan7_body\":\"{{5.roadmap_90_day[7].action}}\",\"plan7_phase\":\"{{5.roadmap_90_day[7].phase}}\",\"plan7_dimension\":\"{{5.roadmap_90_day[7].dimension}}\",\"plan7_owner\":\"{{5.roadmap_90_day[7].owner}}\",\"plan7_outcome\":\"{{5.roadmap_90_day[7].expected_outcome}}\",\"plan8_title\":\"{{5.roadmap_90_day[8].action}}\",\"plan8_body\":\"{{5.roadmap_90_day[8].action}}\",\"plan8_phase\":\"{{5.roadmap_90_day[8].phase}}\",\"plan8_dimension\":\"{{5.roadmap_90_day[8].dimension}}\",\"plan8_owner\":\"{{5.roadmap_90_day[8].owner}}\",\"plan8_outcome\":\"{{5.roadmap_90_day[8].expected_outcome}}\",\"implementation_note\":\"{{5.next_steps.sprint_description}}\"},\"landscape\":false,\"use_print\":true,\"format\":\"A4\"}"
+      },
+      "metadata": {
+        "designer": { "x": 1500, "y": 0 },
+        "notes": "Fetches the 22-page Playbook v3 HTML template from GitHub Pages and injects all Claude-generated content via PDFShift's 'variables' field. Each key in the variables object maps directly to a {{placeholder}} in the HTML template. NOTE: The dimensions array mapping (d2 through d6) must be manually configured in Make.com after import — use the same pattern as d1 but reference dimensions[2] through dimensions[6] respectively. PDFShift handles all rendering and returns a binary PDF."
+      }
+    },
+    {
+      "id": 7,
+      "module": "google-email:sendAnEmail",
+      "version": 4,
+      "parameters": {
+        "__IMTCONN__": "REPLACE_WITH_YOUR_GMAIL_CONNECTION_ID"
+      },
+      "mapper": {
+        "to": ["{{2.customer_email}}"],
+        "subject": "Your Personalised Operational Playbook is Ready — {{3.business_name}}",
+        "bodyType": "rawHtml",
+        "attachments": [
+          {
+            "filename": "Praxis-AI-Operational-Playbook-{{3.business_name}}.pdf",
+            "data": "{{6.data}}"
+          }
+        ],
+        "content": "<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;\">\n  <div style=\"background: #1a1a2e; padding: 28px 36px; text-align: center;\">\n    <p style=\"font-family: Georgia, serif; font-size: 16px; font-weight: bold; color: #4bb4a5; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;\">Praxis <span style=\"color: #ffffff;\">AI</span></p>\n  </div>\n  <div style=\"padding: 36px 36px 28px;\">\n    <p style=\"font-size: 15px; color: #2d2d2d; margin-bottom: 16px;\">Hi {{1.data.object.customer_details.name}},</p>\n    <p style=\"font-size: 15px; color: #2d2d2d; margin-bottom: 16px;\">Your personalised <strong>22-Page Operational Playbook</strong> for <strong>{{3.business_name}}</strong> is attached.</p>\n    <p style=\"font-size: 14px; color: #4a4a4a; margin-bottom: 16px;\">This playbook is built directly from your diagnostic results. It covers all six operational dimensions with specific, phased actions, KPI trackers, and a 90-day roadmap you can start implementing this week.</p>\n    <p style=\"font-size: 14px; color: #4a4a4a; margin-bottom: 24px;\">We recommend starting with the 90-Day Action Roadmap on page 21 to identify your highest-leverage first moves, then diving into the relevant dimension chapters for the full detail.</p>\n    <div style=\"background: #e8f7f5; border-left: 4px solid #4bb4a5; padding: 14px 18px; margin-bottom: 24px;\">\n      <p style=\"font-size: 13px; color: #1a1a2e; margin: 0;\"><strong>Quick tip:</strong> Print the KPI Tracker pages and post them somewhere visible. Teams that track metrics weekly are 3x more likely to hit their 90-day targets.</p>\n    </div>\n    <p style=\"font-size: 14px; color: #4a4a4a;\">If you have any questions about your playbook, simply reply to this email.</p>\n    <p style=\"font-size: 14px; color: #2d2d2d; margin-top: 24px;\">Best regards,<br><strong>The Praxis AI Team</strong></p>\n  </div>\n  <div style=\"background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 16px 36px; text-align: center;\">\n    <p style=\"font-size: 11px; color: #9ca3af; margin: 0;\">This report is for informational purposes only and does not constitute professional advice. &copy; 2026 Praxis AI.</p>\n  </div>\n</div>"
+      },
+      "metadata": {
+        "designer": { "x": 1800, "y": 0 },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "My Gmail connection (joshchakoush@gmail.com)",
+              "data": { "scoped": "true", "connection": "google-email" }
+            }
+          },
+          "expect": {
+            "to": { "mode": "chose", "items": [null] },
+            "bodyType": { "label": "Raw HTML" },
+            "attachments": { "mode": "chose", "items": [null] }
+          }
+        },
+        "parameters": [
+          { "name": "__IMTCONN__", "type": "account:google-email", "label": "Connection", "required": true }
+        ],
+        "notes": "Sends the completed 22-page Playbook PDF to the client. The email body has been updated to reference the full 22-page document and the 90-day roadmap on page 21."
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us2.make.com",
+    "notes": [
+      {
+        "note": "SETUP CHECKLIST — V3 (22-PAGE PLAYBOOK)\n\nReplace all REPLACE_WITH_... placeholders before activating:\n\n1. MODULE 1 (Webhook): Create a Custom Webhook in Make.com named 'Praxis-Stripe-Tier1A-inbound'. Copy its hook ID here. In Stripe, add a webhook pointing to the generated URL, listening for 'checkout.session.completed'.\n\n2. MODULE 3 (Google Sheets): Use your existing Google Sheets connection. Set the spreadsheet ID and confirm the sheet is named 'Diagnostic Results'. CRITICAL: Your sheet must have these columns populated by the diagnostic pipeline: business_name, industry, revenue_band, staff_count, dim1_score through dim6_score, AND d1_finding, d1_callout, d1_roi through d6_finding, d6_callout, d6_roi.\n\n3. MODULE 4 (Claude API): Replace REPLACE_WITH_YOUR_ANTHROPIC_API_KEY. Then paste the FULL content of claude-prompt-operational-playbook-v2.md (from GitHub) into the 'system' field, replacing the placeholder text. The model is claude-opus-4-5 with max_tokens 16000.\n\n4. MODULE 5 (Parse JSON): After importing and running once with a test payload, click 'Re-determine data structure'. This is essential — the new v2 schema is much larger than the previous version.\n\n5. MODULE 6 (PDFShift): Replace REPLACE_WITH_YOUR_PDFSHIFT_API_KEY. IMPORTANT: After re-determining the data structure in Module 5, you will need to manually map dimensions 2-6 (d2 through d6 variables) in the variables object using the same pattern as d1 but referencing dimensions[2] through dimensions[6] from Module 5.\n\n6. MODULE 7 (Gmail): Use the same Gmail connection as your diagnostic scenario.\n\nTESTING: Run a manual test by pasting a sample Stripe webhook payload into Module 1. Verify the PDF renders correctly before sending to real clients."
+      }
+    ]
+  }
+}
