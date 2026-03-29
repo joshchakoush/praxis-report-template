@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Praxis AI — Operational Diagnostic Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#4bb4a5; --teal-light:#5ac3b4; --teal-dim:#e8f5f3; --teal-deep:#1e3c3c;
+  --charcoal:#2d2d2d; --charcoal-mid:#4a4a4a; --charcoal-light:#7a7a7a;
+  --rule:#e0e6e5; --page:#f7fafa; --white:#ffffff;
+  --red:#c0392b; --red-dim:#fdf0ee;
+  --amber:#d4820a; --amber-dim:#fdf6e8;
+  --green:#27836a; --green-dim:#e8f5f1;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:#ffffff;color:var(--charcoal);font-size:13px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+/* ── CORE PAGE RULE ── */
+.page{width:794px;height:1123px;overflow:hidden;margin:0 auto;background:var(--white);box-shadow:0 4px 40px rgba(0,0,0,0.15);position:relative;page-break-after:always;break-after:page;}
+.page:last-child{page-break-after:avoid;break-after:avoid;}
+
+/* COVER */
+.cover{height:1123px;background:var(--charcoal);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.cover-teal-bar{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+.cover-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(75,180,165,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(75,180,165,0.06) 1px,transparent 1px);background-size:44px 44px;}
+.cover-glow{position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(75,180,165,0.15) 0%,transparent 65%);}
+.cover-header{padding:40px 52px 0;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;}
+.cover-logo img{height:110px;width:auto;}
+.cover-confidential{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);text-align:right;line-height:1.9;padding-top:6px;border-top:1px solid rgba(75,180,165,0.4);}
+.cover-body{flex:1;padding:24px 52px 0;position:relative;z-index:2;display:flex;flex-direction:column;}
+.cover-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;}
+.cover-headline{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.1;color:#ffffff;margin-bottom:22px;max-width:560px;}
+.cover-divider{width:44px;height:2px;background:var(--teal);margin-bottom:22px;}
+.cover-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(75,180,165,0.25);max-width:580px;margin-bottom:28px;}
+.cover-meta-item{padding:13px 18px;border-right:1px solid rgba(75,180,165,0.2);border-bottom:1px solid rgba(75,180,165,0.2);}
+.cover-meta-item:nth-child(3),.cover-meta-item:nth-child(6){border-right:none;}
+.cover-meta-item:nth-child(4),.cover-meta-item:nth-child(5),.cover-meta-item:nth-child(6){border-bottom:none;}
+.cover-meta-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:4px;}
+.cover-meta-value{font-size:13px;font-weight:500;color:#ffffff;}
+.cover-chart-section{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:0;min-height:0;}
+.cover-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.cover-chart-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);font-weight:500;}
+.cover-chart-overall{font-family:'DM Serif Display',serif;font-size:26px;color:#ffffff;}
+.cover-chart-overall span{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,0.55);margin-left:4px;}
+.cover-chart-img{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.cover-chart-img img{width:100%;height:auto;display:block;max-width:690px;}
+.cover-footer{padding:20px 52px;border-top:1px solid rgba(75,180,165,0.15);display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2;}
+.cover-footer-text{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;}
+
+/* INNER PAGES */
+.inner-page{height:1123px;display:flex;flex-direction:column;padding:0 52px 0;border-top:1px solid var(--rule);position:relative;overflow:hidden;}
+.inner-page::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+.page-header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 14px;border-bottom:1px solid var(--rule);flex-shrink:0;}
+.page-header-logo img{height:90px;width:auto;}
+.page-header-right{font-family:'DM Mono',monospace;font-size:9px;color:var(--charcoal-light);letter-spacing:0.1em;text-align:right;line-height:1.8;text-transform:uppercase;}
+.page-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.report-footer{border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--page);flex-shrink:0;margin:0 -52px;padding:12px 52px;}
+.footer-disclaimer{font-size:9px;color:var(--charcoal-light);max-width:500px;line-height:1.5;font-family:'DM Mono',monospace;}
+.footer-page{font-family:'DM Mono',monospace;font-size:10px;color:var(--charcoal-light);flex-shrink:0;}
+
+.section-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;flex-shrink:0;}
+.section-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--charcoal);margin-bottom:14px;line-height:1.2;flex-shrink:0;}
+
+/* EXEC SUMMARY */
+.exec-summary{background:var(--charcoal);padding:20px 26px;margin-bottom:18px;position:relative;flex-shrink:0;}
+.exec-summary::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);}
+.exec-summary p{font-size:12.5px;line-height:1.75;color:#e8e8e8;}
+
+/* SCORECARD */
+.scorecard{margin-bottom:18px;flex-shrink:0;}
+.scorecard-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule);}
+.scorecard-row:last-child{border-bottom:none;}
+.scorecard-dim{width:185px;font-size:11.5px;font-weight:500;color:var(--charcoal);flex-shrink:0;}
+.scorecard-bar-track{flex:1;height:5px;background:var(--teal-dim);border-radius:3px;overflow:visible;position:relative;}
+.scorecard-bar-track::after{content:'';position:absolute;left:60%;top:-3px;width:2px;height:11px;background:rgba(212,130,10,0.75);border-radius:1px;}
+.scorecard-bar-fill{height:100%;border-radius:3px;}
+.scorecard-score{width:26px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;text-align:right;color:var(--charcoal);flex-shrink:0;}
+.scorecard-tag{width:230px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.04em;flex-shrink:0;padding:3px 7px;border-radius:2px;}
+
+/* DISCLAIMER */
+.disclaimer-block{background:#1a1a1a;border:2px solid var(--amber);padding:18px 22px;flex-shrink:0;}
+.disclaimer-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.disclaimer-icon{width:24px;height:24px;background:var(--amber);color:#1a1a1a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.disclaimer-heading{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:var(--amber);}
+.disclaimer-text{font-size:10.5px;line-height:1.65;color:#d8d8d8;}
+.disclaimer-text strong{color:#ffffff;font-weight:600;}
+.disclaimer-text em{color:rgba(255,255,255,0.8);font-style:italic;}
+
+/* DIMENSION PAGES */
+.dim-page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid var(--charcoal);flex-shrink:0;}
+.dim-number{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:500;}
+.dim-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--charcoal);line-height:1.1;}
+.dim-score-badge{display:flex;align-items:baseline;gap:6px;flex-shrink:0;}
+.dim-score-num{font-family:'DM Serif Display',serif;font-size:48px;color:var(--teal);line-height:1;font-weight:700;}
+.dim-score-denom{font-family:'DM Mono',monospace;font-size:13px;color:var(--charcoal-light);font-weight:500;}
+.dim-score-status{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:3px;align-self:center;}
+
+.dim-findings{margin-bottom:12px;flex-shrink:0;}
+.dim-findings p{font-size:12.5px;line-height:1.72;color:var(--charcoal-mid);margin-bottom:10px;}
+.dim-findings p:last-child{margin-bottom:0;}
+
+.callout{margin:0 0 8px 0;padding:11px 14px;border-left:3px solid var(--teal);background:var(--teal-dim);flex-shrink:0;}
+.callout:last-of-type{margin-bottom:0;}
+.callout-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:4px;}
+.callout-body{font-size:12px;line-height:1.6;color:var(--charcoal);}
+.callouts-block{margin-bottom:12px;flex-shrink:0;}
+
+.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;flex-shrink:0;}
+.metric-card{padding:12px 11px;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--teal);}
+.metric-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal-deep);line-height:1;margin-bottom:3px;}
+.metric-label{font-size:10.5px;font-weight:600;color:var(--charcoal);margin-bottom:2px;}
+.metric-note{font-size:9.5px;color:var(--charcoal-light);line-height:1.4;}
+
+/* MATURITY LADDER */
+.maturity-block{margin-bottom:8px;flex-shrink:0;background:var(--page);border:1px solid var(--rule);border-top:2px solid var(--charcoal);padding:11px 14px;}
+.maturity-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--charcoal-light);margin-bottom:7px;}
+.maturity-track{display:flex;gap:3px;align-items:stretch;height:26px;}
+.maturity-seg{flex:1;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;font-weight:500;border-radius:2px;position:relative;}
+.maturity-seg.active{outline:2px solid var(--charcoal);outline-offset:1px;}
+.maturity-names{display:flex;gap:3px;margin-top:16px;}
+.maturity-name{flex:2;font-size:8.5px;color:var(--charcoal-light);text-align:center;}
+
+/* WHAT GOOD LOOKS LIKE */
+.wgl-block{background:var(--teal-dim);border:1px solid rgba(75,180,165,0.35);border-top:2px solid var(--teal);padding:11px 14px;flex-shrink:0;margin-bottom:8px;}
+.wgl-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:8px;}
+.wgl-items{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.wgl-item{display:flex;gap:7px;align-items:flex-start;}
+.wgl-tick{width:14px;height:14px;border-radius:50%;background:#ffffff;border:1.5px solid var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.wgl-tick svg{width:8px;height:8px;}
+.wgl-text{font-size:10.5px;line-height:1.5;color:var(--charcoal-mid);}
+
+/* ROI STRIP */
+.roi-block{background:var(--charcoal);border-top:2px solid var(--amber);padding:10px 14px;flex-shrink:0;display:flex;align-items:stretch;gap:0;}
+.roi-label-col{display:flex;flex-direction:column;justify-content:center;padding-right:14px;border-right:1px solid rgba(255,255,255,0.12);flex-shrink:0;min-width:90px;}
+.roi-eyebrow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--amber);margin-bottom:2px;}
+.roi-sublabel{font-size:8.5px;color:rgba(255,255,255,0.4);font-style:italic;}
+.roi-items{display:flex;flex:1;gap:0;}
+.roi-item{flex:1;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;justify-content:center;}
+.roi-item:last-child{border-right:none;}
+.roi-type{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px;}
+.roi-value{font-family:'DM Serif Display',serif;font-size:17px;color:var(--amber);line-height:1;margin-bottom:2px;}
+.roi-desc{font-size:9.5px;color:rgba(255,255,255,0.6);line-height:1.4;}
+
+/* ACTIONS */
+.actions-section{flex-shrink:0;}
+.action-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--rule);}
+.action-item:last-child{border-bottom:none;}
+.action-num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--teal);line-height:1;flex-shrink:0;width:26px;padding-top:2px;}
+.action-title{font-size:12.5px;font-weight:600;color:var(--charcoal);margin-bottom:4px;}
+.action-body{font-size:11.5px;line-height:1.65;color:var(--charcoal-mid);}
+
+/* UPSELL */
+.upsell-section{background:var(--charcoal);padding:14px 20px 16px;margin-top:10px;position:relative;overflow:hidden;flex-shrink:0;page-break-inside:avoid;break-inside:avoid;}
+.upsell-section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+.upsell-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(75,180,165,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(75,180,165,0.05) 1px,transparent 1px);background-size:28px 28px;}
+.upsell-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:3px;position:relative;}
+.upsell-title{font-family:'DM Serif Display',serif;font-size:18px;color:#ffffff;margin-bottom:3px;position:relative;}
+.upsell-intro{font-size:12px;color:#ffffff;font-weight:600;margin-bottom:10px;max-width:560px;position:relative;line-height:1.4;letter-spacing:0.01em;}
+
+/* PLAYBOOK HERO BLOCK */
+.upsell-playbook-hero{background:linear-gradient(135deg,rgba(75,180,165,0.22) 0%,rgba(75,180,165,0.08) 100%);border:2px solid var(--teal);border-radius:4px;padding:13px 16px;margin-bottom:8px;position:relative;display:flex;justify-content:space-between;align-items:stretch;gap:16px;}
+.upsell-playbook-hero::before{content:'BEST VALUE';position:absolute;top:-1px;left:18px;background:var(--teal);color:#ffffff;font-family:'DM Mono',monospace;font-size:8px;font-weight:700;letter-spacing:0.16em;padding:2px 10px;border-radius:0 0 4px 4px;}
+.upsell-hero-left{flex:1;padding-top:10px;}
+.upsell-hero-name{font-family:'DM Serif Display',serif;font-size:17px;color:#ffffff;margin-bottom:5px;line-height:1.2;}
+.upsell-hero-desc{font-size:10px;color:#c0c0c0;line-height:1.5;margin-bottom:6px;}
+.upsell-hero-bullets{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;}
+.upsell-hero-bullet{font-size:10px;color:rgba(255,255,255,0.85);padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.upsell-hero-bullet::before{content:'✓  ';color:var(--teal);font-weight:700;}
+.upsell-hero-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:16px;border-left:1px solid rgba(75,180,165,0.3);min-width:140px;text-align:right;}
+.upsell-hero-was{font-size:10px;color:rgba(255,255,255,0.4);text-decoration:line-through;margin-bottom:2px;}
+.upsell-hero-save{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);background:rgba(212,130,10,0.15);border:1px solid rgba(212,130,10,0.35);padding:2px 8px;border-radius:2px;margin-bottom:6px;display:inline-block;}
+.upsell-hero-price{font-family:'DM Serif Display',serif;font-size:28px;color:var(--teal-light);line-height:1;margin-bottom:2px;}
+.upsell-hero-price-sub{font-size:9.5px;color:rgba(255,255,255,0.45);margin-bottom:10px;}
+.upsell-hero-btn{display:inline-block;padding:9px 18px;background:var(--teal);color:#ffffff;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;border-radius:2px;white-space:nowrap;}
+
+/* TOOLKIT CARDS */
+.upsell-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;margin-bottom:8px;align-items:stretch;}
+.upsell-card{background:rgba(75,180,165,0.07);border:1px solid rgba(75,180,165,0.35);padding:11px 13px;border-top:3px solid var(--teal);display:flex;flex-direction:column;}
+.upsell-card-score{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--amber);letter-spacing:0.08em;margin-bottom:4px;font-weight:600;}
+.upsell-card-title{font-family:'DM Serif Display',serif;font-size:13px;color:#ffffff;margin-bottom:6px;line-height:1.25;}
+.upsell-card-desc{font-size:10.5px;line-height:1.55;color:#b8b8b8;margin-bottom:10px;}
+.upsell-price{display:flex;align-items:baseline;gap:4px;border-top:1px solid rgba(75,180,165,0.2);padding-top:8px;margin-top:auto;}
+.upsell-price-num{font-family:'DM Serif Display',serif;font-size:22px;color:#ffffff;font-weight:700;}
+.upsell-price-label{font-size:10px;color:rgba(255,255,255,0.6);}
+
+/* UPSELL BUTTONS */
+.upsell-btn{display:inline-block;margin-top:8px;padding:8px 14px;background:var(--teal);color:#ffffff;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;border-radius:2px;border:none;cursor:pointer;}
+.upsell-btn:hover{background:var(--teal-light);}
+.upsell-btn-secondary{background:transparent;border:1px solid rgba(75,180,165,0.45);color:var(--teal-light);}
+
+/* WORK WITH PRAXIS BAR */
+.upsell-praxis-bar{background:rgba(75,180,165,0.06);border:1px solid rgba(75,180,165,0.2);border-left:3px solid var(--teal);padding:10px 14px;position:relative;}
+.upsell-praxis-eyebrow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;}
+.upsell-praxis-title{font-size:13px;font-weight:600;color:#ffffff;margin-bottom:4px;}
+.upsell-praxis-body{font-size:10px;color:#b8b8b8;line-height:1.5;margin-bottom:8px;}
+.upsell-praxis-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.upsell-praxis-btn-primary{display:inline-block;padding:8px 16px;background:var(--teal);color:#ffffff;font-family:'DM Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;border-radius:2px;}
+.upsell-praxis-btn-secondary{display:inline-block;padding:8px 16px;background:var(--teal);color:#ffffff;font-family:'DM Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE 1: COVER ══ -->
+<div class="page">
+<div class="cover">
+  <div class="cover-teal-bar"></div>
+  <div class="cover-grid"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-header">
+    <div class="cover-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/XziUQERRfNIlKcWj.png" alt="Praxis AI"></div>
+    <div class="cover-confidential">Operational Diagnostic Report<br>Confidential — Prepared for recipient only<br>{{4.report_date}}</div>
+  </div>
+  <div class="cover-body">
+    <div class="cover-eyebrow">Praxis AI Operational Intelligence Report</div>
+    <div class="cover-headline">{{4.business_name}}</div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-grid">
+      <div class="cover-meta-item"><div class="cover-meta-label">Business</div><div class="cover-meta-value">{{4.business_name}}</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Industry</div><div class="cover-meta-value">{{4.industry}}</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Report Date</div><div class="cover-meta-value">{{4.report_date}}</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Revenue Band</div><div class="cover-meta-value">{{4.revenue_band}}</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Staff</div><div class="cover-meta-value">{{4.staff_count}}</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Years Operating</div><div class="cover-meta-value">{{4.years_operating}}</div></div>
+    </div>
+    <div class="cover-chart-section">
+      <div class="cover-chart-header">
+        <div class="cover-chart-title">Seven-Dimension Score Profile</div>
+        <div class="cover-chart-overall">{{4.overall_score}} <span>/ 10 Overall</span></div>
+      </div>
+      <div class="cover-chart-img">
+<div class="cover-chart-svg-wrap">
+<svg id="radar" viewBox="0 0 690 340" xmlns="http://www.w3.org/2000/svg" style="width:690px;height:340px;display:block;">
+  <defs><style>
+    .rg{fill:none;stroke:rgba(255,255,255,0.12);stroke-width:1;}
+    .rb{fill:none;stroke:rgba(212,130,10,0.55);stroke-width:1.5;stroke-dasharray:4,3;}
+    .ra{stroke:rgba(255,255,255,0.15);stroke-width:1;}
+    .rf{fill:rgba(75,180,165,0.22);stroke:#4bb4a5;stroke-width:2;}
+    .rd{fill:#4bb4a5;}
+    .rl{font-family:"DM Sans",sans-serif;font-size:10px;fill:rgba(255,255,255,0.72);}
+    .rs{font-family:"DM Mono",monospace;font-size:10px;fill:#4bb4a5;font-weight:500;}
+    .rn{font-family:"DM Mono",monospace;font-size:8px;fill:rgba(255,255,255,0.28);}
+  </style></defs>
+  <polygon class="rg" points="345.0,144.0 365.3,153.8 370.3,175.8 356.3,193.4 333.7,193.4 319.7,175.8 324.7,153.8"/>
+  <polygon class="rg" points="345.0,118.0 385.7,137.6 395.7,181.6 367.6,216.9 322.4,216.9 294.3,181.6 304.3,137.6"/>
+  <polygon class="rb" points="345.0,92.0 406.0,121.4 421.0,187.4 378.8,240.3 311.2,240.3 269.0,187.4 284.0,121.4"/>
+  <polygon class="rg" points="345.0,66.0 426.3,105.2 446.4,193.1 390.1,263.7 299.9,263.7 243.6,193.1 263.7,105.2"/>
+  <polygon class="rg" points="345.0,40.0 446.6,88.9 471.7,198.9 401.4,287.1 288.6,287.1 218.3,198.9 243.4,88.9"/>
+  <line class="ra" x1="345" y1="170" x2="345.0" y2="40.0"/>
+  <line class="ra" x1="345" y1="170" x2="446.6" y2="88.9"/>
+  <line class="ra" x1="345" y1="170" x2="471.7" y2="198.9"/>
+  <line class="ra" x1="345" y1="170" x2="401.4" y2="287.1"/>
+  <line class="ra" x1="345" y1="170" x2="288.6" y2="287.1"/>
+  <line class="ra" x1="345" y1="170" x2="218.3" y2="198.9"/>
+  <line class="ra" x1="345" y1="170" x2="243.4" y2="88.9"/>
+  <text class="rn" x="349.0" y="147.0" style="fill:rgba(255,255,255,0.28);">2</text>
+  <text class="rn" x="349.0" y="121.0" style="fill:rgba(255,255,255,0.28);">4</text>
+  <text class="rn" x="349.0" y="95.0" style="fill:rgba(212,130,10,0.7);">6</text>
+  <text class="rn" x="349.0" y="69.0" style="fill:rgba(255,255,255,0.28);">8</text>
+  <text class="rn" x="349.0" y="43.0" style="fill:rgba(255,255,255,0.28);">10</text>
+  <polygon id="score-poly" class="rf" points=""/>
+  <circle id="dot0" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot1" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot2" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot3" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot4" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot5" class="rd" r="4" cx="0" cy="0"/>
+  <circle id="dot6" class="rd" r="4" cx="0" cy="0"/>
+  <text id="slabel0" class="rs" x="0" y="0"></text>
+  <text id="slabel1" class="rs" x="0" y="0"></text>
+  <text id="slabel2" class="rs" x="0" y="0"></text>
+  <text id="slabel3" class="rs" x="0" y="0"></text>
+  <text id="slabel4" class="rs" x="0" y="0"></text>
+  <text id="slabel5" class="rs" x="0" y="0"></text>
+  <text id="slabel6" class="rs" x="0" y="0"></text>
+  <text class="rl" x="345.0" y="18.0" text-anchor="middle"><tspan x="345.0" dy="0">Process &amp;</tspan><tspan x="345.0" dy="13">Workflow</tspan></text>
+  <text class="rl" x="463.8" y="75.2" text-anchor="start"><tspan x="463.8" dy="0">People &amp;</tspan><tspan x="463.8" dy="13">Training</tspan></text>
+  <text class="rl" x="493.2" y="203.8" text-anchor="start">Technology</text>
+  <text class="rl" x="411.0" y="306.9" text-anchor="start">Strategy</text>
+  <text class="rl" x="279.0" y="306.9" text-anchor="end"><tspan x="279.0" dy="0">Data &amp;</tspan><tspan x="279.0" dy="13">Decisions</tspan></text>
+  <text class="rl" x="196.8" y="203.8" text-anchor="end">Scalability</text>
+  <text class="rl" x="226.2" y="75.2" text-anchor="end"><tspan x="226.2" dy="0">AI</tspan><tspan x="226.2" dy="13">Readiness</tspan></text>
+</svg>
+<script>
+(function(){
+  var cx=345,cy=170,maxR=130;
+  var scores=[
+    parseFloat("{{4.dim1_score}}")||0,
+    parseFloat("{{4.dim2_score}}")||0,
+    parseFloat("{{4.dim3_score}}")||0,
+    parseFloat("{{4.dim4_score}}")||0,
+    parseFloat("{{4.dim5_score}}")||0,
+    parseFloat("{{4.dim6_score}}")||0,
+    parseFloat("{{4.d7_score}}")||0
+  ];
+  var pts=[];
+  for(var i=0;i<7;i++){
+    var a=Math.PI*(-0.5+i*2/7);
+    var r=(scores[i]/10)*maxR;
+    var x=cx+r*Math.cos(a);
+    var y=cy+r*Math.sin(a);
+    pts.push(x.toFixed(1)+","+y.toFixed(1));
+    var d=document.getElementById("dot"+i);
+    d.setAttribute("cx",x.toFixed(1));
+    d.setAttribute("cy",y.toFixed(1));
+    var lr=r+16;
+    var sl=document.getElementById("slabel"+i);
+    sl.setAttribute("x",(cx+lr*Math.cos(a)).toFixed(1));
+    sl.setAttribute("y",(cy+lr*Math.sin(a)+4).toFixed(1));
+    sl.setAttribute("text-anchor","middle");
+    sl.textContent=scores[i];
+  }
+  document.getElementById("score-poly").setAttribute("points",pts.join(" "));
+})();
+</script>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <div class="cover-footer-text">Praxis AI — Operational Intelligence for Australian SMEs</div>
+    <div class="cover-footer-text">&copy; 2026 Praxis AI — All Rights Reserved</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PAGE 2: EXEC SUMMARY + SCORECARD + DISCLAIMER ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header">
+    <div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div>
+    <div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div>
+  </div>
+  <div class="page-content">
+    <div class="section-eyebrow" style="margin-top:14px;">Overview</div>
+    <div class="section-title">Executive Summary</div>
+    <div class="exec-summary"><p>{{4.executive_summary}}</p></div>
+    <div class="section-eyebrow" style="margin-top:14px;">Results</div>
+    <div class="section-title">Seven-Dimension Scorecard</div>
+    <div class="scorecard">
+      <div class="scorecard-row"><div class="scorecard-dim">Process &amp; Workflow</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim1_score}}0%;background:{{4.dim1_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim1_score}}</div><div class="scorecard-tag" style="background:{{4.dim1_tag_bg}};color:{{4.dim1_tag_colour}}">{{4.dim1_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">People &amp; Training</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim2_score}}0%;background:{{4.dim2_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim2_score}}</div><div class="scorecard-tag" style="background:{{4.dim2_tag_bg}};color:{{4.dim2_tag_colour}}">{{4.dim2_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">Technology &amp; Automation</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim3_score}}0%;background:{{4.dim3_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim3_score}}</div><div class="scorecard-tag" style="background:{{4.dim3_tag_bg}};color:{{4.dim3_tag_colour}}">{{4.dim3_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">Strategy to Execution</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim4_score}}0%;background:{{4.dim4_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim4_score}}</div><div class="scorecard-tag" style="background:{{4.dim4_tag_bg}};color:{{4.dim4_tag_colour}}">{{4.dim4_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">Data &amp; Decision Making</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim5_score}}0%;background:{{4.dim5_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim5_score}}</div><div class="scorecard-tag" style="background:{{4.dim5_tag_bg}};color:{{4.dim5_tag_colour}}">{{4.dim5_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">Scalability</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.dim6_score}}0%;background:{{4.dim6_bar_colour}}"></div></div><div class="scorecard-score">{{4.dim6_score}}</div><div class="scorecard-tag" style="background:{{4.dim6_tag_bg}};color:{{4.dim6_tag_colour}}">{{4.dim6_status}}</div></div>
+      <div class="scorecard-row"><div class="scorecard-dim">AI &amp; Automation Readiness</div><div class="scorecard-bar-track"><div class="scorecard-bar-fill" style="width:{{4.d7_score}}0%;background:{{4.d7_bar_colour}}"></div></div><div class="scorecard-score">{{4.d7_score}}</div><div class="scorecard-tag" style="background:{{4.d7_tag_bg}};color:{{4.d7_tag_colour}}">{{4.d7_status}}</div></div>
+    </div>
+    <div class="disclaimer-block">
+      <div class="disclaimer-icon-row"><div class="disclaimer-icon">!</div><div class="disclaimer-heading">Legal Disclaimer &amp; Limitations of This Report</div></div>
+      <div class="disclaimer-text">
+        <strong>This report does not constitute financial, legal, accounting, tax, or any form of professional advice.</strong> It is an automated diagnostic output generated solely from self-reported responses and has not been independently verified. No warranty, express or implied, is given as to accuracy, completeness, or fitness for any purpose.<br><br>
+        All financial figures, estimates, and ranges are derived exclusively from data declared by the respondent. <strong>No figure in this report should be relied upon for financial planning, investment decisions, or any commercial transaction without independent verification by a qualified professional.</strong><br><br>
+        <strong>ROI calculations are based on the client's revenue band, staff count, and industry. These figures are approximate.</strong> Actual outcomes will vary based on implementation quality, market conditions, and individual business circumstances. These figures must not be used as the basis for any financial commitment, investment, or business decision without independent professional review.<br><br>
+        Praxis AI expressly excludes all liability to the fullest extent permitted under the <em>Australian Consumer Law</em> for any loss arising from use of or reliance upon this report. Receipt constitutes acknowledgement of these terms. <strong>Engage a licensed accountant, solicitor, or registered business advisor for formal advice.</strong>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 2 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 3: DIMENSION 01 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 01</div><div class="dim-title">Process &amp; Workflow</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim1_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim1_tag_bg}};color:{{4.dim1_tag_colour}}">{{4.dim1_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim1_finding_1}}</p>
+      <p>{{4.dim1_finding_2}}</p>
+      <p>{{4.dim1_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim1_callout_1_border}};background:{{4.dim1_callout_1_bg}}"><div class="callout-label">{{4.dim1_callout_1_label}}</div><div class="callout-body">{{4.dim1_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim1_callout_2_border}};background:{{4.dim1_callout_2_bg}}"><div class="callout-label">{{4.dim1_callout_2_label}}</div><div class="callout-body">{{4.dim1_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_1_num}}</div><div class="metric-label">{{4.dim1_metric_1_label}}</div><div class="metric-note">{{4.dim1_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_2_num}}</div><div class="metric-label">{{4.dim1_metric_2_label}}</div><div class="metric-note">{{4.dim1_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim1_metric_3_num}}</div><div class="metric-label">{{4.dim1_metric_3_label}}</div><div class="metric-note">{{4.dim1_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim1_mat_1_active}}" style="background:{{4.dim1_mat_1_bg}};color:{{4.dim1_mat_1_text}};flex:2;">{{4.dim1_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim1_mat_2_active}}" style="background:{{4.dim1_mat_2_bg}};color:{{4.dim1_mat_2_text}};flex:2;">{{4.dim1_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim1_mat_3_active}}" style="background:{{4.dim1_mat_3_bg}};color:{{4.dim1_mat_3_text}};flex:2;">{{4.dim1_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim1_mat_4_active}}" style="background:{{4.dim1_mat_4_bg}};color:{{4.dim1_mat_4_text}};flex:2;">{{4.dim1_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim1_mat_5_active}}" style="background:{{4.dim1_mat_5_bg}};color:{{4.dim1_mat_5_text}};flex:2;">{{4.dim1_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names">
+        <div class="maturity-name">Reactive<br>1–2</div>
+        <div class="maturity-name">Developing<br>3–4</div>
+        <div class="maturity-name">Functional<br>5–6</div>
+        <div class="maturity-name">Optimised<br>7–8</div>
+        <div class="maturity-name">Leading<br>9–10</div>
+      </div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim1_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim1_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim1_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim1_roi_1_type}}</div><div class="roi-value">{{4.dim1_roi_1_value}}</div><div class="roi-desc">{{4.dim1_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim1_roi_2_type}}</div><div class="roi-value">{{4.dim1_roi_2_value}}</div><div class="roi-desc">{{4.dim1_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim1_roi_3_type}}</div><div class="roi-value">{{4.dim1_roi_3_value}}</div><div class="roi-desc">{{4.dim1_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 3 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 4: DIMENSION 02 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 02</div><div class="dim-title">People &amp; Training</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim2_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim2_tag_bg}};color:{{4.dim2_tag_colour}}">{{4.dim2_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim2_finding_1}}</p>
+      <p>{{4.dim2_finding_2}}</p>
+      <p>{{4.dim2_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim2_callout_1_border}};background:{{4.dim2_callout_1_bg}}"><div class="callout-label">{{4.dim2_callout_1_label}}</div><div class="callout-body">{{4.dim2_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim2_callout_2_border}};background:{{4.dim2_callout_2_bg}}"><div class="callout-label">{{4.dim2_callout_2_label}}</div><div class="callout-body">{{4.dim2_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_1_num}}</div><div class="metric-label">{{4.dim2_metric_1_label}}</div><div class="metric-note">{{4.dim2_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_2_num}}</div><div class="metric-label">{{4.dim2_metric_2_label}}</div><div class="metric-note">{{4.dim2_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim2_metric_3_num}}</div><div class="metric-label">{{4.dim2_metric_3_label}}</div><div class="metric-note">{{4.dim2_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim2_mat_1_active}}" style="background:{{4.dim2_mat_1_bg}};color:{{4.dim2_mat_1_text}};flex:2;">{{4.dim2_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim2_mat_2_active}}" style="background:{{4.dim2_mat_2_bg}};color:{{4.dim2_mat_2_text}};flex:2;">{{4.dim2_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim2_mat_3_active}}" style="background:{{4.dim2_mat_3_bg}};color:{{4.dim2_mat_3_text}};flex:2;">{{4.dim2_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim2_mat_4_active}}" style="background:{{4.dim2_mat_4_bg}};color:{{4.dim2_mat_4_text}};flex:2;">{{4.dim2_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim2_mat_5_active}}" style="background:{{4.dim2_mat_5_bg}};color:{{4.dim2_mat_5_text}};flex:2;">{{4.dim2_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim2_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim2_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim2_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim2_roi_1_type}}</div><div class="roi-value">{{4.dim2_roi_1_value}}</div><div class="roi-desc">{{4.dim2_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim2_roi_2_type}}</div><div class="roi-value">{{4.dim2_roi_2_value}}</div><div class="roi-desc">{{4.dim2_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim2_roi_3_type}}</div><div class="roi-value">{{4.dim2_roi_3_value}}</div><div class="roi-desc">{{4.dim2_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 4 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 5: DIMENSION 03 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 03</div><div class="dim-title">Technology &amp; Automation</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim3_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim3_tag_bg}};color:{{4.dim3_tag_colour}}">{{4.dim3_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim3_finding_1}}</p>
+      <p>{{4.dim3_finding_2}}</p>
+      <p>{{4.dim3_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim3_callout_1_border}};background:{{4.dim3_callout_1_bg}}"><div class="callout-label">{{4.dim3_callout_1_label}}</div><div class="callout-body">{{4.dim3_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim3_callout_2_border}};background:{{4.dim3_callout_2_bg}}"><div class="callout-label">{{4.dim3_callout_2_label}}</div><div class="callout-body">{{4.dim3_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_1_num}}</div><div class="metric-label">{{4.dim3_metric_1_label}}</div><div class="metric-note">{{4.dim3_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_2_num}}</div><div class="metric-label">{{4.dim3_metric_2_label}}</div><div class="metric-note">{{4.dim3_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim3_metric_3_num}}</div><div class="metric-label">{{4.dim3_metric_3_label}}</div><div class="metric-note">{{4.dim3_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim3_mat_1_active}}" style="background:{{4.dim3_mat_1_bg}};color:{{4.dim3_mat_1_text}};flex:2;">{{4.dim3_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim3_mat_2_active}}" style="background:{{4.dim3_mat_2_bg}};color:{{4.dim3_mat_2_text}};flex:2;">{{4.dim3_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim3_mat_3_active}}" style="background:{{4.dim3_mat_3_bg}};color:{{4.dim3_mat_3_text}};flex:2;">{{4.dim3_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim3_mat_4_active}}" style="background:{{4.dim3_mat_4_bg}};color:{{4.dim3_mat_4_text}};flex:2;">{{4.dim3_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim3_mat_5_active}}" style="background:{{4.dim3_mat_5_bg}};color:{{4.dim3_mat_5_text}};flex:2;">{{4.dim3_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim3_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim3_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim3_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim3_roi_1_type}}</div><div class="roi-value">{{4.dim3_roi_1_value}}</div><div class="roi-desc">{{4.dim3_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim3_roi_2_type}}</div><div class="roi-value">{{4.dim3_roi_2_value}}</div><div class="roi-desc">{{4.dim3_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim3_roi_3_type}}</div><div class="roi-value">{{4.dim3_roi_3_value}}</div><div class="roi-desc">{{4.dim3_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 5 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 6: DIMENSION 04 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 04</div><div class="dim-title">Strategy to Execution</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim4_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim4_tag_bg}};color:{{4.dim4_tag_colour}}">{{4.dim4_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim4_finding_1}}</p>
+      <p>{{4.dim4_finding_2}}</p>
+      <p>{{4.dim4_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim4_callout_1_border}};background:{{4.dim4_callout_1_bg}}"><div class="callout-label">{{4.dim4_callout_1_label}}</div><div class="callout-body">{{4.dim4_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim4_callout_2_border}};background:{{4.dim4_callout_2_bg}}"><div class="callout-label">{{4.dim4_callout_2_label}}</div><div class="callout-body">{{4.dim4_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_1_num}}</div><div class="metric-label">{{4.dim4_metric_1_label}}</div><div class="metric-note">{{4.dim4_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_2_num}}</div><div class="metric-label">{{4.dim4_metric_2_label}}</div><div class="metric-note">{{4.dim4_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim4_metric_3_num}}</div><div class="metric-label">{{4.dim4_metric_3_label}}</div><div class="metric-note">{{4.dim4_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim4_mat_1_active}}" style="background:{{4.dim4_mat_1_bg}};color:{{4.dim4_mat_1_text}};flex:2;">{{4.dim4_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim4_mat_2_active}}" style="background:{{4.dim4_mat_2_bg}};color:{{4.dim4_mat_2_text}};flex:2;">{{4.dim4_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim4_mat_3_active}}" style="background:{{4.dim4_mat_3_bg}};color:{{4.dim4_mat_3_text}};flex:2;">{{4.dim4_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim4_mat_4_active}}" style="background:{{4.dim4_mat_4_bg}};color:{{4.dim4_mat_4_text}};flex:2;">{{4.dim4_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim4_mat_5_active}}" style="background:{{4.dim4_mat_5_bg}};color:{{4.dim4_mat_5_text}};flex:2;">{{4.dim4_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim4_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim4_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim4_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim4_roi_1_type}}</div><div class="roi-value">{{4.dim4_roi_1_value}}</div><div class="roi-desc">{{4.dim4_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim4_roi_2_type}}</div><div class="roi-value">{{4.dim4_roi_2_value}}</div><div class="roi-desc">{{4.dim4_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim4_roi_3_type}}</div><div class="roi-value">{{4.dim4_roi_3_value}}</div><div class="roi-desc">{{4.dim4_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 6 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 7: DIMENSION 05 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 05</div><div class="dim-title">Data &amp; Decision Making</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim5_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim5_tag_bg}};color:{{4.dim5_tag_colour}}">{{4.dim5_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim5_finding_1}}</p>
+      <p>{{4.dim5_finding_2}}</p>
+      <p>{{4.dim5_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim5_callout_1_border}};background:{{4.dim5_callout_1_bg}}"><div class="callout-label">{{4.dim5_callout_1_label}}</div><div class="callout-body">{{4.dim5_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim5_callout_2_border}};background:{{4.dim5_callout_2_bg}}"><div class="callout-label">{{4.dim5_callout_2_label}}</div><div class="callout-body">{{4.dim5_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_1_num}}</div><div class="metric-label">{{4.dim5_metric_1_label}}</div><div class="metric-note">{{4.dim5_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_2_num}}</div><div class="metric-label">{{4.dim5_metric_2_label}}</div><div class="metric-note">{{4.dim5_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim5_metric_3_num}}</div><div class="metric-label">{{4.dim5_metric_3_label}}</div><div class="metric-note">{{4.dim5_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim5_mat_1_active}}" style="background:{{4.dim5_mat_1_bg}};color:{{4.dim5_mat_1_text}};flex:2;">{{4.dim5_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim5_mat_2_active}}" style="background:{{4.dim5_mat_2_bg}};color:{{4.dim5_mat_2_text}};flex:2;">{{4.dim5_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim5_mat_3_active}}" style="background:{{4.dim5_mat_3_bg}};color:{{4.dim5_mat_3_text}};flex:2;">{{4.dim5_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim5_mat_4_active}}" style="background:{{4.dim5_mat_4_bg}};color:{{4.dim5_mat_4_text}};flex:2;">{{4.dim5_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim5_mat_5_active}}" style="background:{{4.dim5_mat_5_bg}};color:{{4.dim5_mat_5_text}};flex:2;">{{4.dim5_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim5_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim5_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim5_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim5_roi_1_type}}</div><div class="roi-value">{{4.dim5_roi_1_value}}</div><div class="roi-desc">{{4.dim5_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim5_roi_2_type}}</div><div class="roi-value">{{4.dim5_roi_2_value}}</div><div class="roi-desc">{{4.dim5_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim5_roi_3_type}}</div><div class="roi-value">{{4.dim5_roi_3_value}}</div><div class="roi-desc">{{4.dim5_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 7 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 8: DIMENSION 06 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 06</div><div class="dim-title">Scalability</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.dim6_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.dim6_tag_bg}};color:{{4.dim6_tag_colour}}">{{4.dim6_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.dim6_finding_1}}</p>
+      <p>{{4.dim6_finding_2}}</p>
+      <p>{{4.dim6_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.dim6_callout_1_border}};background:{{4.dim6_callout_1_bg}}"><div class="callout-label">{{4.dim6_callout_1_label}}</div><div class="callout-body">{{4.dim6_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.dim6_callout_2_border}};background:{{4.dim6_callout_2_bg}}"><div class="callout-label">{{4.dim6_callout_2_label}}</div><div class="callout-body">{{4.dim6_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_1_num}}</div><div class="metric-label">{{4.dim6_metric_1_label}}</div><div class="metric-note">{{4.dim6_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_2_num}}</div><div class="metric-label">{{4.dim6_metric_2_label}}</div><div class="metric-note">{{4.dim6_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.dim6_metric_3_num}}</div><div class="metric-label">{{4.dim6_metric_3_label}}</div><div class="metric-note">{{4.dim6_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.dim6_mat_1_active}}" style="background:{{4.dim6_mat_1_bg}};color:{{4.dim6_mat_1_text}};flex:2;">{{4.dim6_mat_1_val}}</div>
+        <div class="maturity-seg {{4.dim6_mat_2_active}}" style="background:{{4.dim6_mat_2_bg}};color:{{4.dim6_mat_2_text}};flex:2;">{{4.dim6_mat_2_val}}</div>
+        <div class="maturity-seg {{4.dim6_mat_3_active}}" style="background:{{4.dim6_mat_3_bg}};color:{{4.dim6_mat_3_text}};flex:2;">{{4.dim6_mat_3_val}}</div>
+        <div class="maturity-seg {{4.dim6_mat_4_active}}" style="background:{{4.dim6_mat_4_bg}};color:{{4.dim6_mat_4_text}};flex:2;">{{4.dim6_mat_4_val}}</div>
+        <div class="maturity-seg {{4.dim6_mat_5_active}}" style="background:{{4.dim6_mat_5_bg}};color:{{4.dim6_mat_5_text}};flex:2;">{{4.dim6_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim6_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim6_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.dim6_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.dim6_roi_1_type}}</div><div class="roi-value">{{4.dim6_roi_1_value}}</div><div class="roi-desc">{{4.dim6_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim6_roi_2_type}}</div><div class="roi-value">{{4.dim6_roi_2_value}}</div><div class="roi-desc">{{4.dim6_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.dim6_roi_3_type}}</div><div class="roi-value">{{4.dim6_roi_3_value}}</div><div class="roi-desc">{{4.dim6_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 8 of 11</div></div>
+</div>
+</div>
+
+
+<!-- ══ PAGE 9: DIMENSION 07 ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div style="margin-top:12px;" class="dim-page-header">
+      <div class="dim-page-left"><div class="dim-number">Dimension 07</div><div class="dim-title">AI &amp; Automation Readiness</div></div>
+      <div class="dim-score-badge"><div class="dim-score-num">{{4.d7_score}}</div><div><div class="dim-score-denom">/ 10</div><div class="dim-score-status" style="background:{{4.d7_tag_bg}};color:{{4.d7_tag_colour}}">{{4.d7_status}}</div></div></div>
+    </div>
+    <div class="dim-findings">
+      <p>{{4.d7_finding_1}}</p>
+      <p>{{4.d7_finding_2}}</p>
+      <p>{{4.d7_finding_3}}</p>
+    </div>
+    <div class="callouts-block">
+      <div class="callout" style="border-left-color:{{4.d7_callout_1_border}};background:{{4.d7_callout_1_bg}}"><div class="callout-label">{{4.d7_callout_1_label}}</div><div class="callout-body">{{4.d7_callout_1_body}}</div></div>
+      <div class="callout" style="border-left-color:{{4.d7_callout_2_border}};background:{{4.d7_callout_2_bg}}"><div class="callout-label">{{4.d7_callout_2_label}}</div><div class="callout-body">{{4.d7_callout_2_body}}</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">{{4.d7_metric_1_num}}</div><div class="metric-label">{{4.d7_metric_1_label}}</div><div class="metric-note">{{4.d7_metric_1_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.d7_metric_2_num}}</div><div class="metric-label">{{4.d7_metric_2_label}}</div><div class="metric-note">{{4.d7_metric_2_note}}</div></div>
+      <div class="metric-card"><div class="metric-num">{{4.d7_metric_3_num}}</div><div class="metric-label">{{4.d7_metric_3_label}}</div><div class="metric-note">{{4.d7_metric_3_note}}</div></div>
+    </div>
+    <div class="maturity-block">
+      <div class="maturity-label">Maturity Level</div>
+      <div class="maturity-track">
+        <div class="maturity-seg {{4.d7_mat_1_active}}" style="background:{{4.d7_mat_1_bg}};color:{{4.d7_mat_1_text}};flex:2;">{{4.d7_mat_1_val}}</div>
+        <div class="maturity-seg {{4.d7_mat_2_active}}" style="background:{{4.d7_mat_2_bg}};color:{{4.d7_mat_2_text}};flex:2;">{{4.d7_mat_2_val}}</div>
+        <div class="maturity-seg {{4.d7_mat_3_active}}" style="background:{{4.d7_mat_3_bg}};color:{{4.d7_mat_3_text}};flex:2;">{{4.d7_mat_3_val}}</div>
+        <div class="maturity-seg {{4.d7_mat_4_active}}" style="background:{{4.d7_mat_4_bg}};color:{{4.d7_mat_4_text}};flex:2;">{{4.d7_mat_4_val}}</div>
+        <div class="maturity-seg {{4.d7_mat_5_active}}" style="background:{{4.d7_mat_5_bg}};color:{{4.d7_mat_5_text}};flex:2;">{{4.d7_mat_5_val}}</div>
+      </div>
+      <div class="maturity-names"><div class="maturity-name">Reactive<br>1–2</div><div class="maturity-name">Developing<br>3–4</div><div class="maturity-name">Functional<br>5–6</div><div class="maturity-name">Optimised<br>7–8</div><div class="maturity-name">Leading<br>9–10</div></div>
+    </div>
+    <div class="wgl-block">
+      <div class="wgl-label">What Good Looks Like — Score 8+</div>
+      <div class="wgl-items">
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.d7_wgl_1}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.d7_wgl_2}}</div></div>
+        <div class="wgl-item"><div class="wgl-tick"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#4bb4a5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="wgl-text">{{4.d7_wgl_3}}</div></div>
+      </div>
+    </div>
+    <div class="roi-block">
+      <div class="roi-label-col"><div class="roi-eyebrow">ROI Estimate</div><div class="roi-sublabel">Indicative only</div></div>
+      <div class="roi-items">
+        <div class="roi-item"><div class="roi-type">{{4.d7_roi_1_type}}</div><div class="roi-value">{{4.d7_roi_1_value}}</div><div class="roi-desc">{{4.d7_roi_1_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.d7_roi_2_type}}</div><div class="roi-value">{{4.d7_roi_2_value}}</div><div class="roi-desc">{{4.d7_roi_2_desc}}</div></div>
+        <div class="roi-item"><div class="roi-type">{{4.d7_roi_3_type}}</div><div class="roi-value">{{4.d7_roi_3_value}}</div><div class="roi-desc">{{4.d7_roi_3_desc}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 9 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 10: PRIORITY ACTIONS ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div class="section-eyebrow" style="margin-top:14px;">What To Do Next</div>
+    <div class="section-title">Priority Actions</div>
+    <div class="actions-section">
+      <div class="action-item"><div class="action-num">1</div><div><div class="action-title">{{4.action_1_title}}</div><div class="action-body">{{4.action_1_body}}</div></div></div>
+      <div class="action-item"><div class="action-num">2</div><div><div class="action-title">{{4.action_2_title}}</div><div class="action-body">{{4.action_2_body}}</div></div></div>
+      <div class="action-item"><div class="action-num">3</div><div><div class="action-title">{{4.action_3_title}}</div><div class="action-body">{{4.action_3_body}}</div></div></div>
+      <div class="action-item"><div class="action-num">4</div><div><div class="action-title">{{4.action_4_title}}</div><div class="action-body">{{4.action_4_body}}</div></div></div>
+      <div class="action-item"><div class="action-num">5</div><div><div class="action-title">{{4.action_5_title}}</div><div class="action-body">{{4.action_5_body}}</div></div></div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 10 of 11</div></div>
+</div>
+</div>
+
+<!-- ══ PAGE 10: RECOMMENDED NEXT STEPS (UPSELL) ══ -->
+<div class="page">
+<div class="inner-page">
+  <div class="page-header"><div class="page-header-logo"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030227401/bBMhzdzjnVHwxUqs.png" alt="Praxis AI"></div><div class="page-header-right">{{4.business_name}}<br>{{4.industry}}<br>{{4.report_date}}</div></div>
+  <div class="page-content">
+    <div class="upsell-section" style="margin-top:18px;">
+      <div class="upsell-bg"></div>
+      <div class="upsell-eyebrow">Recommended Next Steps</div>
+      <div class="upsell-title">Your Personalised Action Plan</div>
+      <div class="upsell-intro">You now know where the gaps are. Here is what to do about it.</div>
+
+      <!-- PLAYBOOK HERO -->
+      <div class="upsell-playbook-hero">
+        <div class="upsell-hero-left">
+          <div class="upsell-hero-name">Operational Playbook — All 7 Dimensions</div>
+          <div class="upsell-hero-bullets" style="margin-top:4px;">
+            <div class="upsell-hero-bullet">7-dimension gap analysis</div>
+            <div class="upsell-hero-bullet">24 prioritised recommendations</div>
+            <div class="upsell-hero-bullet">Implementation plans &amp; KPI trackers</div>
+            <div class="upsell-hero-bullet">7-day quick wins per dimension</div>
+            <div class="upsell-hero-bullet">90-day cross-dimension roadmap</div>
+            <div class="upsell-hero-bullet">22-page PDF — instant delivery</div>
+          </div>
+          <div style="margin-top:8px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--teal);border-top:1px solid rgba(75,180,165,0.25);padding-top:7px;">All 7 toolkits in one</div>
+        </div>
+        <div class="upsell-hero-right">
+          <div class="upsell-hero-was">Individual toolkits: $700 AUD</div>
+          <div class="upsell-hero-save">YOU SAVE $151</div>
+          <div class="upsell-hero-price">$449 AUD</div>
+          <div class="upsell-hero-price-sub">one-time &middot; instant delivery</div>
+          <a href="https://buy.stripe.com/PLACEHOLDER_PLAYBOOK" class="upsell-hero-btn">Get Your Playbook &rarr;</a>
+        </div>
+      </div>
+
+      <!-- TOOLKIT CARDS -->
+      <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#ffffff;margin-bottom:7px;position:relative;border-top:1px solid rgba(75,180,165,0.25);padding-top:8px;">Or — Target Your Two Lowest-Scoring Dimensions First</div>
+      <div class="upsell-cards">
+        <div class="upsell-card">
+          <div class="upsell-card-score">SCORE: {{4.upsell_1_score}} — {{4.upsell_1_status}}</div>
+          <div class="upsell-card-title">{{4.upsell_1_title}}</div>
+          <div class="upsell-hero-bullets" style="margin-bottom:8px;">
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_1}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_2}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_1_bullet_3}}</div>
+          </div>
+          <div class="upsell-price"><div class="upsell-price-num">$100</div><div class="upsell-price-label">&nbsp;AUD one-time</div></div>
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_1" class="upsell-btn" style="background:var(--navy,#1a1a2e);border:1px solid var(--teal);color:#ffffff;width:100%;text-align:center;display:block;">Get This Toolkit &rarr;</a>
+        </div>
+        <div class="upsell-card">
+          <div class="upsell-card-score">SCORE: {{4.upsell_2_score}} — {{4.upsell_2_status}}</div>
+          <div class="upsell-card-title">{{4.upsell_2_title}}</div>
+          <div class="upsell-hero-bullets" style="margin-bottom:8px;">
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_1}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_2}}</div>
+            <div class="upsell-hero-bullet">{{4.upsell_2_bullet_3}}</div>
+          </div>
+          <div class="upsell-price"><div class="upsell-price-num">$100</div><div class="upsell-price-label">&nbsp;AUD one-time</div></div>
+          <a href="https://buy.stripe.com/PLACEHOLDER_TOOLKIT_2" class="upsell-btn" style="background:var(--navy,#1a1a2e);border:1px solid var(--teal);color:#ffffff;width:100%;text-align:center;display:block;">Get This Toolkit &rarr;</a>
+        </div>
+      </div>
+
+      <!-- WORK WITH PRAXIS -->
+      <div class="upsell-praxis-bar">
+        <div class="upsell-praxis-eyebrow">Want Help Implementing This?</div>
+        <div class="upsell-praxis-title">Work Directly With Praxis AI</div>
+        <div class="upsell-praxis-body">The tools above give you the plan. If you want expert support to implement it — with structured delivery, accountability, and someone who has done it before — Praxis AI works directly with Australian SMBs to turn diagnostic findings into measurable operational change.</div>
+        <div class="upsell-praxis-btns">
+          <a href="https://calendly.com/joshchakoush/30min" class="upsell-praxis-btn-primary" style="display:inline-flex;align-items:center;gap:8px;">&#128222; Book a Free Discovery Call <span style="font-weight:400;opacity:0.75;font-size:8.5px;">30 min &middot; No obligation</span></a>
+          <a href="https://calendly.com/joshchakoush/30min" class="upsell-praxis-btn-secondary" style="display:inline-flex;align-items:center;gap:8px;">90-Day Implementation Sprint <span style="font-weight:400;opacity:0.75;font-size:8.5px;">From $1,997 AUD &middot; Fixed scope</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="report-footer"><div class="footer-disclaimer">Directional indicators only. Not professional advice. &copy; 2026 Praxis AI.</div><div class="footer-page">Page 11 of 11</div></div>
+</div>
+</div>
+
+</body>
+</html>
